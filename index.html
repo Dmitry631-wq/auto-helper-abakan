@@ -1025,6 +1025,137 @@ const FAQS=[
   {q:'Как оставить отзыв?',a:'Перейдите в раздел "Отзывы", войдите в аккаунт и нажмите "+ Написать отзыв". Выберите организацию, поставьте оценку и напишите комментарий.'},
 ];
 
+// Регламенты ТО по маркам (км)
+const BRAND_INTERVALS = {
+  // Японские
+  'Toyota':     {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Lexus':      {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Honda':      {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Nissan':     {oil:10000, cabin:15000, spark:30000, belt:100000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Infiniti':   {oil:10000, cabin:15000, spark:30000, belt:100000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Mazda':      {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Mitsubishi': {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Subaru':     {oil:10000, cabin:15000, spark:20000, belt:105000, brake:40000, airfilter:30000, coolant:80000, transmission:40000},
+  'Suzuki':     {oil:10000, cabin:15000, spark:30000, belt:70000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Daihatsu':   {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Isuzu':      {oil:10000, cabin:15000, spark:30000, belt:100000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  // Корейские
+  'Hyundai':    {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Kia':        {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Genesis':    {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'SsangYong':  {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  // Немецкие
+  'BMW':        {oil:15000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:80000},
+  'Alpina':     {oil:15000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:80000},
+  'Mercedes-Benz': {oil:15000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:80000},
+  'Audi':       {oil:15000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:80000},
+  'Volkswagen': {oil:15000, cabin:20000, spark:30000, belt:90000, brake:50000, airfilter:30000, coolant:80000, transmission:60000},
+  'Skoda':      {oil:15000, cabin:20000, spark:30000, belt:90000, brake:50000, airfilter:30000, coolant:80000, transmission:60000},
+  'SEAT':       {oil:15000, cabin:20000, spark:30000, belt:90000, brake:50000, airfilter:30000, coolant:80000, transmission:60000},
+  'CUPRA':      {oil:15000, cabin:20000, spark:30000, belt:90000, brake:50000, airfilter:30000, coolant:80000, transmission:60000},
+  'Porsche':    {oil:15000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:80000},
+  'Lamborghini':{oil:15000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:80000},
+  // Французские
+  'Renault':    {oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Peugeot':    {oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Citroën':    {oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'DS Automobiles':{oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Dacia':      {oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  // Итальянские
+  'Fiat':       {oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'FIAT':       {oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Alfa Romeo': {oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Abarth':     {oil:10000, cabin:15000, spark:20000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Ferrari':    {oil:15000, cabin:20000, spark:30000, belt:0, brake:30000, airfilter:20000, coolant:80000, transmission:40000},
+  'Maserati':   {oil:10000, cabin:20000, spark:30000, belt:0, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  // Американские
+  'Ford':       {oil:8000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Chevrolet':  {oil:8000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Cadillac':   {oil:10000, cabin:15000, spark:40000, belt:0, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Dodge':      {oil:8000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Chrysler':   {oil:8000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Jeep':       {oil:8000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'RAM':        {oil:8000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Lincoln':    {oil:10000, cabin:15000, spark:40000, belt:0, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Tesla':      {oil:0, cabin:24000, spark:0, belt:0, brake:80000, airfilter:24000, coolant:160000, transmission:0},
+  // Британские
+  'Land Rover': {oil:10000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:60000},
+  'Jaguar':     {oil:10000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:60000},
+  'Aston Martin':{oil:10000, cabin:20000, spark:30000, belt:0, brake:40000, airfilter:20000, coolant:80000, transmission:40000},
+  'Rolls-Royce':{oil:15000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:80000},
+  'Bentley':    {oil:15000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:80000},
+  'MINI':       {oil:15000, cabin:20000, spark:40000, belt:0, brake:50000, airfilter:30000, coolant:100000, transmission:80000},
+  // Шведские
+  'Volvo':      {oil:10000, cabin:20000, spark:30000, belt:100000, brake:40000, airfilter:30000, coolant:100000, transmission:80000},
+  'Saab':       {oil:10000, cabin:15000, spark:30000, belt:80000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  // Российские
+  'Lada (ВАЗ)': {oil:7500, cabin:10000, spark:15000, belt:60000, brake:30000, airfilter:15000, coolant:60000, transmission:60000},
+  'ВАЗ (Lada)': {oil:7500, cabin:10000, spark:15000, belt:60000, brake:30000, airfilter:15000, coolant:60000, transmission:60000},
+  'ГАЗ':        {oil:7500, cabin:10000, spark:15000, belt:60000, brake:30000, airfilter:15000, coolant:60000, transmission:60000},
+  'UAZ (УАЗ)':  {oil:7500, cabin:10000, spark:15000, belt:60000, brake:30000, airfilter:15000, coolant:60000, transmission:60000},
+  'УАЗ':        {oil:7500, cabin:10000, spark:15000, belt:60000, brake:30000, airfilter:15000, coolant:60000, transmission:60000},
+  'Москвич':    {oil:7500, cabin:10000, spark:15000, belt:60000, brake:30000, airfilter:15000, coolant:60000, transmission:60000},
+  'ИЖ':         {oil:7500, cabin:10000, spark:15000, belt:60000, brake:30000, airfilter:15000, coolant:60000, transmission:60000},
+  'КамАЗ':      {oil:7500, cabin:10000, spark:0, belt:0, brake:30000, airfilter:15000, coolant:60000, transmission:60000},
+  // Китайские
+  'Chery':      {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Geely':      {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Haval':      {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Great Wall':  {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'BYD':        {oil:10000, cabin:15000, spark:0, belt:0, brake:50000, airfilter:25000, coolant:80000, transmission:0},
+  'Changan':    {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'FAW':        {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'GAC':        {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Hongqi':     {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Tank':       {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Jetour':     {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'JAECOO':     {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'OMODA':      {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'EXEED':      {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'JAC':        {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'MG':         {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Lifan':      {oil:8000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:20000, coolant:60000, transmission:60000},
+  'Zeekr':      {oil:0, cabin:20000, spark:0, belt:0, brake:50000, airfilter:20000, coolant:80000, transmission:0},
+  'Xpeng':      {oil:0, cabin:20000, spark:0, belt:0, brake:50000, airfilter:20000, coolant:80000, transmission:0},
+  'Lixiang (Li Auto)':{oil:0, cabin:20000, spark:0, belt:0, brake:50000, airfilter:20000, coolant:80000, transmission:0},
+  'Nio':        {oil:0, cabin:20000, spark:0, belt:0, brake:50000, airfilter:20000, coolant:80000, transmission:0},
+  'Voyah':      {oil:0, cabin:20000, spark:0, belt:0, brake:50000, airfilter:20000, coolant:80000, transmission:0},
+  // Корейские ещё
+  'Daewoo':     {oil:7500, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:20000, coolant:60000, transmission:60000},
+  // Прочие
+  'Opel':       {oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'smart':      {oil:10000, cabin:20000, spark:30000, belt:0, brake:40000, airfilter:20000, coolant:80000, transmission:60000},
+  'Suzuki':     {oil:10000, cabin:15000, spark:30000, belt:70000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'Acura':      {oil:10000, cabin:15000, spark:30000, belt:100000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+  'DS Automobiles':{oil:10000, cabin:15000, spark:30000, belt:60000, brake:40000, airfilter:30000, coolant:80000, transmission:60000},
+};
+
+function getBrandIntervals(make){
+  // Find brand key
+  for(const key of Object.keys(BRAND_INTERVALS)){
+    if(make && make.toLowerCase().startsWith(key.toLowerCase())) return BRAND_INTERVALS[key];
+    if(make && key.toLowerCase().startsWith(make.toLowerCase())) return BRAND_INTERVALS[key];
+  }
+  // Default
+  return {oil:10000, cabin:15000, spark:30000, belt:90000, brake:40000, airfilter:30000, coolant:80000, transmission:60000};
+}
+
+function getToItems(make){
+  const b = getBrandIntervals(make);
+  const items = [
+    {name:'🛢️ Масло моторное', km:b.oil},
+    {name:'🔩 Фильтр салона', km:b.cabin},
+    {name:'🌬️ Воздушный фильтр', km:b.airfilter},
+    {name:'⚡ Свечи зажигания', km:b.spark},
+    {name:'❄️ Охлаждающая жидкость', km:b.coolant},
+    {name:'🛑 Тормозные колодки', km:b.brake},
+  ];
+  if(b.belt > 0) items.push({name:'🔧 Ремень ГРМ', km:b.belt});
+  if(b.transmission > 0) items.push({name:'⚙️ Масло в АКПП/МКПП', km:b.transmission});
+  // Filter out zero intervals (electric cars don't have spark/oil)
+  return items.filter(i => i.km > 0);
+}
+
 const TO_ITEMS=[{name:'🛢️ Масло моторное',km:10000},{name:'🔩 Фильтр салона',km:15000},{name:'⚡ Свечи зажигания',km:30000},{name:'🔧 Ремень ГРМ',km:60000},{name:'🛑 Тормозные колодки',km:40000}];
 const EMOJIS=['🚗','🚙','🛻','🚕','🏎️','🚐'];
 
@@ -1292,7 +1423,7 @@ function renderGarage(){
   const emp=document.getElementById('garageEmpty'),grid=document.getElementById('garageCars');
   if(!cars.length){emp.style.display='';grid.innerHTML='';document.getElementById('garageHint').textContent='';return;}
   emp.style.display='none';document.getElementById('garageHint').textContent='Автомобилей: '+cars.length;
-  grid.innerHTML=cars.map((c,i)=>`<div class="car-card"><span class="car-emoji">${EMOJIS[i%EMOJIS.length]}</span><div class="car-name">${c.make} ${c.model}</div><div class="car-info">${c.year} · ${parseInt(c.mileage||0).toLocaleString()} км · ${c.engine}</div><div class="to-list">${TO_ITEMS.map(t=>{const s=getToSt(c.mileage,t.km);return`<div class="to-row"><span class="to-name">${t.name}</span><div style="text-align:right"><div class="to-badge ${s.cls}">${s.label}</div><div style="font-size:11px;color:var(--gray);margin-top:1px">${s.km}</div></div></div>`;}).join('')}</div><div class="car-actions"><button class="car-btn cbe" onclick="openEditCar(${i})">✏️ Редактировать</button><button class="car-btn cbd" onclick="deleteCar(${i})">🗑️ Удалить</button></div></div>`).join('');
+  grid.innerHTML=cars.map((c,i)=>`<div class="car-card"><span class="car-emoji">${EMOJIS[i%EMOJIS.length]}</span><div class="car-name">${c.make} ${c.model}</div><div class="car-info">${c.year} · ${parseInt(c.mileage||0).toLocaleString()} км · ${c.engine}</div><div class="to-list">${getToItems(c.make).map(t=>{const s=getToSt(c.mileage,t.km);return`<div class="to-row"><span class="to-name">${t.name}</span><div style="text-align:right"><div class="to-badge ${s.cls}">${s.label}</div><div style="font-size:11px;color:var(--gray);margin-top:1px">${s.km}</div></div></div>`;}).join('')}</div><div class="car-actions"><button class="car-btn cbe" onclick="openEditCar(${i})">✏️ Редактировать</button><button class="car-btn cbd" onclick="deleteCar(${i})">🗑️ Удалить</button></div></div>`).join('');
 }
 
 function callEvacuator(){
@@ -1320,7 +1451,31 @@ function callTechHelp(){
 
 function openMaps(name, addr){
   const q = encodeURIComponent(addr + ' Абакан');
-  window.open('https://maps.google.com/?q=' + q, '_blank');
+  // Try 2GIS app deep link first, fallback to 2GIS website
+  const dgisApp = '2gis://search?query=' + q;
+  const dgisWeb = 'https://2gis.ru/abakan/search/' + q;
+  
+  // Try to open 2GIS app
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+  
+  // Set timeout to detect if app opened
+  let appOpened = false;
+  const timer = setTimeout(() => {
+    if (!appOpened) {
+      // App not installed - open 2GIS website
+      window.open(dgisWeb, '_blank');
+    }
+    document.body.removeChild(iframe);
+  }, 1500);
+
+  window.addEventListener('blur', () => {
+    appOpened = true;
+    clearTimeout(timer);
+  }, { once: true });
+
+  iframe.src = dgisApp;
 }
 
 // Review search
