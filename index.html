@@ -314,9 +314,12 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
     <h2>Редактировать профиль</h2><div class="modal-sub">Обновите ваши данные</div>
     <div class="fg"><label>Имя</label><input type="text" id="epName"></div>
     <div class="fg"><label>Телефон</label><input type="tel" id="epPhone"></div>
-    <div class="fg"><label>Город</label><input type="text" id="epCity" placeholder="Абакан"></div>
-    <div class="fg"><label>Новый пароль (оставьте пустым, чтобы не менять)</label><input type="password" id="epPass" placeholder="••••••••"></div>
-    <button class="btn btn-dark" style="margin-top:8px" onclick="saveProfile()">Сохранить</button>
+    <div style="border-top:1px solid var(--beige-mid);margin:14px 0;padding-top:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Смена пароля (необязательно)</div>
+      <div class="fg"><label>Текущий пароль</label><input type="password" id="epOldPass" placeholder="Введите текущий пароль"></div>
+      <div class="fg"><label>Новый пароль</label><input type="password" id="epPass" placeholder="Минимум 6 символов"></div>
+    </div>
+    <button class="btn btn-dark" style="margin-top:4px" onclick="saveProfile()">Сохранить</button>
   </div>
 </div>
 
@@ -601,7 +604,7 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
 const DB={get(k){try{return JSON.parse(localStorage.getItem('ah_'+k))}catch{return null}},set(k,v){localStorage.setItem('ah_'+k,JSON.stringify(v))},push(k,i){const a=DB.get(k)||[];a.push(i);DB.set(k,a);return a}};
 
 // ══ API CONFIG ══
-const API = 'https://auto-helper-backend-production.up.railway.app/api/users';
+const API = 'https://auto-helper-backend-production.up.railway.app/api/auth';
 
 function getToken(){ return DB.get('access_token')||''; }
 function getRefresh(){ return DB.get('refresh_token')||''; }
@@ -1845,7 +1848,7 @@ function openEditProfile(){
   if(!currentUser)return;
   document.getElementById('epName').value=currentUser.name||'';
   document.getElementById('epPhone').value=currentUser.phone||'';
-  document.getElementById('epCity').value=currentUser.city||'Абакан';
+  document.getElementById('epOldPass').value='';
   document.getElementById('epPass').value='';
   openModal('editProfileModal');
 }
@@ -1854,23 +1857,29 @@ async function saveProfile(){
   const phone=document.getElementById('epPhone').value.trim();
   const city=document.getElementById('epCity').value.trim();
   const pass=document.getElementById('epPass').value;
+  const oldPass=document.getElementById('epOldPass').value;
   if(!name){showToast('Введите имя',false);return;}
   const nameParts=name.split(' ');
   const body={first_name:nameParts[0]||'',last_name:nameParts.slice(1).join(' ')||''};
   if(phone) body.phone=phone;
-  // Update profile
+  // Update profile name/phone
   const res = await apiCall(API+'/profile/', 'PATCH', body, true);
   if(res.ok){
     const u=res.data;
     currentUser={...currentUser,name,phone,city,email:u.email};
     DB.set('currentUser',currentUser);
-    // Change password if provided
+    // Change password only if new password provided
     if(pass.length>=6){
-      await apiCall(API+'/change-password/','POST',{old_password:'',new_password:pass},true);
+      if(!oldPass){showToast('Укажите текущий пароль для смены',false);return;}
+      const pwRes=await apiCall(API+'/change-password/','POST',{old_password:oldPass,new_password:pass},true);
+      if(!pwRes.ok){showToast(pwRes.data.detail||'Неверный текущий пароль',false);return;}
+      showToast('Пароль изменён ✓',true);
     }
     closeModal('editProfileModal');updateNav();renderProfile();showToast('Профиль обновлён ✓',true);
   } else {
-    showToast(res.data.detail||'Ошибка обновления',false);
+    const err=res.data;
+    const msg=err.detail||err.phone?.[0]||err.first_name?.[0]||'Ошибка обновления';
+    showToast(msg,false);
   }
 }
 
