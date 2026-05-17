@@ -424,11 +424,16 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
   <div class="sos-bar">
     <div class="sos-inner">
       <div class="sos-content reveal"><div class="stag">Экстренная помощь</div><h2 class="stitle">Помощь в одно нажатие</h2><p class="ssub">Сломался? Попал в аварию? Вызови помощь мгновенно.</p>
-        <div class="sos-nums"><div class="sos-num"><div class="sos-num-val">112</div><div class="sos-num-lbl">Экстренные</div></div><div class="sos-num"><div class="sos-num-val">103</div><div class="sos-num-lbl">Скорая</div></div><div class="sos-num"><div class="sos-num-val">102</div><div class="sos-num-lbl">Полиция</div></div></div>
+        <div class="sos-nums">
+          <a class="sos-num" href="tel:112" style="text-decoration:none"><div class="sos-num-val">112</div><div class="sos-num-lbl">Экстренные</div></a>
+          <a class="sos-num" href="tel:103" style="text-decoration:none"><div class="sos-num-val">103</div><div class="sos-num-lbl">Скорая</div></a>
+          <a class="sos-num" href="tel:102" style="text-decoration:none"><div class="sos-num-val">102</div><div class="sos-num-lbl">Полиция</div></a>
+          <a class="sos-num" href="tel:101" style="text-decoration:none"><div class="sos-num-val">101</div><div class="sos-num-lbl">Пожарная</div></a>
+        </div>
       </div>
       <div class="sos-btns reveal">
-        <button class="sos-action sos-primary" onclick="showToast('Вызов эвакуатора...',false)">🚨 <div><div>Вызвать эвакуатор</div><div style="font-size:10px;font-weight:400;opacity:.7;margin-top:2px">Быстрый вызов</div></div></button>
-        <button class="sos-action sos-ghost" onclick="showToast('Техническая помощь вызвана',true)">🔧 Техническая помощь</button>
+        <button class="sos-action sos-primary" onclick="callEvacuator()">🚨 <div><div>Вызвать эвакуатор</div><div style="font-size:10px;font-weight:400;opacity:.7;margin-top:2px">Найти ближайший</div></div></button>
+        <button class="sos-action sos-ghost" onclick="callTechHelp()">🔧 Техническая помощь</button>
         <button class="sos-action sos-ghost" onclick="showPage('catalog')">📞 Найти организацию</button>
       </div>
     </div>
@@ -451,7 +456,7 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
 
 <!-- CATALOG -->
 <div class="page" id="page-catalog">
-  <div class="page-header"><h1>Организации Абакана</h1><p>26 автосервисов, эвакуаторов и магазинов запчастей</p></div>
+  <div class="page-header"><h1>Организации Абакана</h1><p>26 организаций Абакана: автосервисы, эвакуаторы, магазины запчастей</p></div>
   <div class="toolbar">
     <div class="search-box"><input type="text" id="searchInput" placeholder="Поиск..." oninput="filterOrgs()"></div>
     <div class="filter-btns">
@@ -581,110 +586,126 @@ async function apiCall(url, method='GET', body=null, auth=false){
 }
 
 const ORGS=[
-  // Автосервисы — 14
-  {name:'Fit Service',type:'service',phone:'+7 390 200-01-01',hours:'8:00–20:00',dist:'1.2 км',addr:'ул. Пушкина, 12'},
-  {name:'АКПП-Мастер',type:'service',phone:'+7 390 200-02-02',hours:'9:00–19:00',dist:'2.1 км',addr:'ул. Торговая, 45'},
-  {name:'Авто Звук 19',type:'service',phone:'+7 390 200-03-03',hours:'9:00–18:00',dist:'0.8 км',addr:'пр. Ленина, 78'},
-  {name:'Бош Авто Сервис',type:'service',phone:'+7 390 200-04-04',hours:'8:00–20:00',dist:'3.4 км',addr:'ул. Советская, 23'},
-  {name:'Автомастер',type:'service',phone:'+7 390 200-05-05',hours:'8:00–21:00',dist:'1.8 км',addr:'ул. Дружбы, 11'},
-  {name:'Шиномонтаж Экспресс',type:'service',phone:'+7 390 200-06-06',hours:'8:00–22:00',dist:'0.5 км',addr:'ул. Кирова, 56'},
-  {name:'Кузовной центр Абакан',type:'service',phone:'+7 390 200-13-13',hours:'9:00–19:00',dist:'2.6 км',addr:'ул. Промышленная, 8'},
-  {name:'АвтоСпектр',type:'service',phone:'+7 390 200-14-14',hours:'8:00–20:00',dist:'3.0 км',addr:'ул. Вяткина, 34'},
-  {name:'СТО Надёжный',type:'service',phone:'+7 390 200-15-15',hours:'8:00–19:00',dist:'4.1 км',addr:'ул. Некрасова, 19'},
-  {name:'АвтоТехЦентр',type:'service',phone:'+7 390 200-16-16',hours:'9:00–20:00',dist:'1.5 км',addr:'пр. Дружбы, 55'},
-  {name:'Мастер Плюс',type:'service',phone:'+7 390 200-17-17',hours:'8:00–21:00',dist:'2.4 км',addr:'ул. Маяковского, 6'},
-  {name:'АвтоДоктор',type:'service',phone:'+7 390 200-18-18',hours:'9:00–18:00',dist:'3.7 км',addr:'ул. Чертыгашева, 42'},
-  {name:'Гараж Сервис',type:'service',phone:'+7 390 200-19-19',hours:'8:00–20:00',dist:'1.9 км',addr:'ул. Щетинкина, 88'},
-  {name:'ТехноСервис',type:'service',phone:'+7 390 200-20-20',hours:'9:00–19:00',dist:'2.8 км',addr:'ул. Кирова, 102'},
-  // Эвакуаторы — 6
-  {name:'Эвакуатор — Тувинская',type:'evac',phone:'+7 390 200-07-07',hours:'Круглосуточно',dist:'2.8 км',addr:'ул. Тувинская, 3'},
-  {name:'Дорожная помощь',type:'evac',phone:'+7 390 200-08-08',hours:'Круглосуточно',dist:'4.2 км',addr:'пр. Дружбы, 90'},
-  {name:'Эвакуатор 24/7',type:'evac',phone:'+7 390 200-09-09',hours:'Круглосуточно',dist:'3.1 км',addr:'ул. Вяткина, 15'},
-  {name:'АвтоПомощь Абакан',type:'evac',phone:'+7 390 200-21-21',hours:'Круглосуточно',dist:'1.7 км',addr:'ул. Пушкина, 67'},
-  {name:'Быстрый Эвакуатор',type:'evac',phone:'+7 390 200-22-22',hours:'Круглосуточно',dist:'5.3 км',addr:'ул. Саянская, 12'},
-  {name:'СпасАвто',type:'evac',phone:'+7 390 200-23-23',hours:'Круглосуточно',dist:'3.9 км',addr:'ул. Торговая, 120'},
-  // Запчасти — 6
-  {name:'АвтоЗапчасти 24',type:'parts',phone:'+7 390 200-10-10',hours:'9:00–20:00',dist:'1.5 км',addr:'ул. Маяковского, 34'},
-  {name:'Авторынок Абакан',type:'parts',phone:'+7 390 200-11-11',hours:'8:00–18:00',dist:'5.0 км',addr:'ул. Промышленная, 1'},
-  {name:'МаслоЦентр',type:'parts',phone:'+7 390 200-12-12',hours:'9:00–19:00',dist:'2.3 км',addr:'ул. Некрасова, 67'},
-  {name:'ЗапчастиПлюс',type:'parts',phone:'+7 390 200-24-24',hours:'8:00–20:00',dist:'1.1 км',addr:'ул. Советская, 88'},
-  {name:'Авто Детали',type:'parts',phone:'+7 390 200-25-25',hours:'9:00–19:00',dist:'2.7 км',addr:'пр. Ленина, 145'},
-  {name:'АвтоМаркет',type:'parts',phone:'+7 390 200-26-26',hours:'8:00–21:00',dist:'3.3 км',addr:'ул. Кирова, 77'},
+  {id:3, name:'Auto Teams (Чип-тюнинг)',type:'service',phone:'+7 (3902) 32-24-44',hours:'Ежедневно: 10:00–23:00',dist:'1.8 км',addr:'ул. Вяткина, 18',services:'Чип-тюнинг, перепрошивка ЭБУ, автосигнализация, видеорегистратор, парктроники, кондиционер'},
+  {id:6, name:'DasService',type:'service',phone:'+7 (905) 997-87-00',hours:'Пн–Пт: 9:00–18:00',dist:'2.0 км',addr:'просп. Ленина, 218Б',services:'Ремонт немецких авто, диагностика, АКПП, топливная система, электрика'},
+  {id:1, name:'Fit Service (Фит Сервис)',type:'service',phone:'+7 (3902) 26-88-80',hours:'Ежедневно: 9:00–21:00',dist:'1.3 км',addr:'ул. Итыгина, 13В',services:'Замена масла, диагностика, ТО, шиномонтаж, развал-схождение, тормоза'},
+  {id:14, name:'Gas&Auto',type:'service',phone:'+7 (905) 997-87-55',hours:'Пн–Пт: 9:00–18:00',dist:'3.5 км',addr:'ул. Аскизская, 105',services:'Установка ГБО, обслуживание и ремонт ГБО, оформление документов ГИБДД'},
+  {id:26, name:'OIL-Bank',type:'parts',phone:'+7 (961) 896-92-99',hours:'Пн–Сб: 9:00–19:00',dist:'4.5 км',addr:'ул. Пихтовая, 1 (Аскизский тракт)',services:'Моторные масла Mobil/Shell/Castrol, фильтры, антифриз, автохимия'},
+  {id:15, name:'Shik & Blesk',type:'service',phone:'+7 (3902) 32-99-55',hours:'Ежедневно: 9:00–21:00',dist:'1.7 км',addr:'ул. Щетинкина, 32',services:'Автомойка, химчистка салона, полировка, нанокерамика, детейлинг'},
+  {id:7, name:'АвтоShop19',type:'service',phone:'+7 (983) 272-10-00',hours:'Ежедневно: 9:00–20:00',dist:'2.3 км',addr:'ул. Чертыгашева, 85',services:'Кузовной ремонт, покраска, подвеска, шиномонтаж, кондиционер, антикор'},
+  {id:22, name:'Авто SOS — Саралинская',type:'evac',phone:'+7 (983) 272-10-11',hours:'Круглосуточно',dist:'2.3 км',addr:'ул. Саралинская, 4А',services:'Эвакуация, прикуривание, вытаскивание из снега, доставка топлива'},
+  {id:25, name:'АвтоДетали Плюс',type:'parts',phone:'+7 (902) 467-99-55',hours:'Пн–Вс: 8:00–21:00',dist:'3.0 км',addr:'ул. Заводская, 44',services:'Тормоза, фильтры, запчасти для BMW/Mercedes/Ford/Opel, заказ деталей'},
+  {id:9, name:'АвтоДоктор',type:'service',phone:'+7 (902) 011-33-55',hours:'Пн–Пт: 9:00–18:00, Сб: 10:00–15:00',dist:'3.2 км',addr:'ул. Чертыгашева, 282',services:'Диагностика, сцепление, рулевые наконечники, подвеска, датчики, ТО'},
+  {id:23, name:'АвтоЗапчасти 24',type:'parts',phone:'+7 (3902) 26-88-55',hours:'Пн–Вс: 8:00–22:00',dist:'1.1 км',addr:'ул. Торговая, 5',services:'Масла, фильтры, тормоза, аккумуляторы, ремни ГРМ, свечи, подбор по VIN'},
+  {id:17, name:'Авто Звук 19',type:'service',phone:'+7 (913) 448-91-99',hours:'Пн–Вс: 10:00–20:00',dist:'2.4 км',addr:'ул. Механическая, 39',services:'Акустика, магнитола, усилитель, видеорегистратор, парктроники, камера'},
+  {id:18, name:'Автосигнализации — Установочный центр',type:'service',phone:'+7 (3902) 29-09-55',hours:'Пн–Сб: 9:00–19:00',dist:'2.8 км',addr:'ул. Советская, 180',services:'Автосигнализации, автозапуск, иммобилайзер, GPS-мониторинг, StarLine, Pandect'},
+  {id:10, name:'Автострада',type:'service',phone:'+7 (902) 467-99-95',hours:'Пн–Сб: 8:00–20:00',dist:'2.7 км',addr:'ул. Железнодорожная, 26П',services:'Сцепление, капремонт двигателя, рулевая рейка, стойки, топливный насос, ТО'},
+  {id:11, name:'АвтоТон-19',type:'service',phone:'+7 (908) 325-05-75',hours:'Пн–Сб: 8:00–19:00',dist:'3.0 км',addr:'ул. Железнодорожная, 44',services:'Тонировка, шумоизоляция, антикор, химчистка, полировка, защитная плёнка'},
+  {id:13, name:'АКПП-Мастер',type:'service',phone:'+7 (961) 896-92-55',hours:'Пн–Сб: 9:00–18:00',dist:'2.6 км',addr:'25-я улица, 11',services:'Ремонт АКПП и вариатора, диагностика КПП, замена масла, промывка, гидроблок'},
+  {id:2, name:'Бош Авто Сервис Абакан',type:'service',phone:'+7 (3902) 29-09-09',hours:'Пн–Пт: 9:00–19:00, Сб: 9:00–16:00',dist:'2.1 км',addr:'ул. Пушкина, 213Ф',services:'Диагностика, ремонт двигателя, ремень ГРМ, ходовая, электрика, шиномонтаж'},
+  {id:8, name:'ВЕК Автосервис',type:'service',phone:'+7 (3902) 26-95-95',hours:'Пн–Сб: 8:00–19:00',dist:'2.5 км',addr:'ул. Чертыгашева, 27',services:'Ремень ГРМ, масло, генератор, подшипники, тормоза, подвеска, диагностика'},
+  {id:20, name:'Дорожная помощь — Торговая',type:'evac',phone:'+7 (961) 896-92-11',hours:'Круглосуточно',dist:'1.1 км',addr:'ул. Торговая, 9',services:'Эвакуация, вытаскивание из грязи/снега, прикуривание, помощь после ДТП'},
+  {id:24, name:'Запчасти Маркет',type:'parts',phone:'+7 (913) 100-200-33',hours:'Пн–Сб: 9:00–20:00',dist:'2.2 км',addr:'ул. Рыночная, 18',services:'Запчасти для иномарок и отечественных авто, масла, аккумуляторы, автохимия'},
+  {id:12, name:'Мастер-Авто',type:'service',phone:'+7 (3902) 26-99-95',hours:'Ежедневно: 9:00–19:00',dist:'1.4 км',addr:'ул. Игарская, 11А',services:'ТО, кондиционер, ходовая, датчики, диагностика, масло, подшипники'},
+  {id:5, name:'Планета Авто',type:'service',phone:'+7 (3902) 26-52-00',hours:'Пн–Сб: 8:00–20:00',dist:'1.5 км',addr:'ул. Пушкина, 115',services:'Развал-схождение, масло, амортизаторы, тормоза, сезонная смена шин, хранение шин'},
+  {id:16, name:'Ресурс-Авто',type:'service',phone:'+7 (913) 448-91-55',hours:'Пн–Сб: 9:00–19:00',dist:'2.2 км',addr:'ул. Крылова, 34Г',services:'Стойки, шаровые, рулевые тяги, тормоза, диагностика подвески, масло'},
+  {id:21, name:'Эвакуатор — Кравченко',type:'evac',phone:'+7 (905) 997-87-11',hours:'Круглосуточно',dist:'1.9 км',addr:'ул. Кравченко, 11',services:'Эвакуация, вытаскивание из кювета, межгород, прикуривание, помощь после ДТП'},
+  {id:19, name:'Эвакуатор — Тувинская',type:'evac',phone:'+7 (3902) 32-99-11',hours:'Круглосуточно',dist:'0.7 км',addr:'ул. Тувинская, 11',services:'Эвакуация, кювет, прикуривание, топливо, замена колеса, межгород'},
+  {id:4, name:'Энергия Скорости СТО',type:'service',phone:'+7 (3902) 32-99-00',hours:'Круглосуточно',dist:'0.9 км',addr:'ул. Пушкина, 19',services:'Подвеска, масло, тормоза, рулевая рейка, диагностика, антифриз, срочный ремонт'},
 ];
 
+
 const CAR_MODELS={
-'Abarth':['500','595','695','124 Spider'],
-'Alfa Romeo':['Giulia','Stelvio','Tonale','147','156','159','Giulietta','Spider','GT'],
-'Audi':['A1','A2','A3','A3 Sportback','A4','A4 Avant','A4 Allroad','A5','A5 Sportback','A6','A6 Avant','A6 Allroad','A7','A8','Q2','Q3','Q3 Sportback','Q5','Q5 Sportback','Q7','Q8','Q8 e-tron','TT','TTS','TT RS','R8','RS3','RS4','RS5','RS6','RS7','S3','S4','S5','S6','S7','S8','e-tron','Q4 e-tron','SQ5','SQ7','SQ8'],
-'BMW':['116i','118i','118d','120i','120d','125i','128ti','M135i','218i','220i','225i','228i','316i','318i','320i','323i','325i','328i','330i','335i','340i','M340i','418i','420i','420d','425i','430i','435i','440i','520i','523i','525i','525d','528i','530i','535i','540i','545i','550i','M550i','630i','640i','650i','730i','730d','740i','740d','750i','760i','X1','X2','X3','X3 M','X4','X4 M','X5','X5 M','X6','X6 M','X7','Z4','M2','M3','M4','M5','M8','i3','i4','i5','i7','iX','iX1','iX3'],
-'Chevrolet':['Aveo','Cobalt','Cruze','Epica','Equinox','Captiva','Lacetti','Lanos','Malibu','Niva','Orlando','Spark','Tahoe','Tracker','Trailblazer','Traverse','Camaro','Corvette','Sonic','Trax'],
-'Chery':['Tiggo 2','Tiggo 4','Tiggo 4 Pro','Tiggo 7','Tiggo 7 Pro','Tiggo 8','Tiggo 8 Pro','Tiggo 8 Pro Max','Arrizo 5','Arrizo 6','Arrizo 8','Omoda 5','Omoda C5'],
+'Abarth':['500','595','695','124 Spider','Grande Punto'],
+'Acura':['ILX','MDX','NSX','RDX','RLX','TLX','ZDX'],
+'Alfa Romeo':['147','156','159','166','Brera','GT','GTV','Giulia','Giulietta','MiTo','Spider','Stelvio','Tonale'],
+'Alpina':['B3','B4','B5','B7','D3','D5','XB7'],
+'Aston Martin':['DB9','DB11','DBS','DBX','Rapide','Vanquish','Vantage'],
+'Audi':['80','90','100','A1','A2','A3','A3 Sportback','A4','A4 Avant','A4 Allroad','A5','A5 Sportback','A6','A6 Avant','A6 Allroad','A7','A8','A8 L','Q2','Q3','Q3 Sportback','Q5','Q5 Sportback','Q7','Q8','Q8 e-tron','Q4 e-tron','TT','TTS','TT RS','R8','RS3','RS4','RS4 Avant','RS5','RS5 Sportback','RS6','RS6 Avant','RS7','S3','S4','S4 Avant','S5','S5 Sportback','S6','S7','S8','SQ5','SQ7','SQ8','Allroad','Cabriolet','Coupe'],
+'BAIC':['BJ20','BJ40','BJ80','X25','X35','X55','Senova D50','Senova X55','Senova X65'],
+'BMW':['316i','316d','318i','318d','320i','320d','323i','325i','325d','328i','330i','330d','335i','335d','340i','M3','M3 CS','418i','420i','420d','425i','428i','430i','435i','440i','M4','520i','520d','523i','525i','525d','528i','530i','530d','535i','535d','540i','550i','M5','630i','640i','640d','650i','M6','730i','730d','735i','740i','740d','745i','750i','760i','X1 18i','X1 20i','X1 25i','X2 18i','X2 20i','X2 25i','X3 20i','X3 20d','X3 25i','X3 28i','X3 30i','X3 M','X4 20i','X4 20d','X4 28i','X4 30i','X4 M','X5 25d','X5 30i','X5 30d','X5 35i','X5 40i','X5 50i','X5 M','X6 30i','X6 30d','X6 35i','X6 40i','X6 50i','X6 M','X7 30d','X7 40i','X7 50i','Z3','Z4 20i','Z4 28i','Z4 30i','Z4 35i','M2','M2 CS','i3','i4','i5','i7','iX','iX1','iX3'],
+'BYD':['Atto 3','Han','Han EV','Song','Song Plus','Song Pro','Seal','Seal U','Seal DM-i','Tang','Tang EV','Dolphin','Seagull','Yuan Plus','Destroyer 05','Frigate 07','U8','Sea Lion 6','Sea Lion 07'],
+'Cadillac':['ATS','CT4','CT5','CT6','CTS','Escalade','SRX','STS','XT4','XT5','XT6','XTS'],
+'Changan':['CS15','CS35','CS35 Plus','CS55','CS55 Plus','CS75','CS75 Plus','CS85','CS95','Uni-K','Uni-T','Uni-V','Uni-Z','Deepal S7','Deepal L7','Hunter Plus','Lamore','Oshan X5','Oshan X7'],
+'Chery':['Amulet','Bonus','Fora','Kimo','QQ','Tiggo','Tiggo 2','Tiggo 2 Pro','Tiggo 3','Tiggo 4','Tiggo 4 Pro','Tiggo 5','Tiggo 7','Tiggo 7 Pro','Tiggo 7 Pro Max','Tiggo 8','Tiggo 8 Pro','Tiggo 8 Pro Max','Arrizo 3','Arrizo 5','Arrizo 5 Plus','Arrizo 6','Arrizo 7','Arrizo 8','Omoda 5','Omoda C5','Exlantix ES','Exlantix ET'],
+'Chevrolet':['Aveo','Captiva','Cobalt','Colorado','Corvette','Cruze','Epica','Equinox','Lacetti','Lanos','Malibu','Niva','Niva Travel','Orlando','Silverado','Sonic','Spark','Suburban','Tahoe','Tracker','TrailBlazer','Traverse','Trax','Camaro'],
 'Chrysler':['300','300C','Pacifica','Voyager','Sebring','PT Cruiser'],
-'Citroën':['C1','C2','C3','C3 Aircross','C4','C4 Cactus','C4 Picasso','C5','C5 Aircross','C5 X','Berlingo','Jumpy','Spacetourer'],
-'Dacia':['Logan','Sandero','Duster','Spring','Jogger'],
-'Dodge':['Challenger','Charger','Durango','Ram','Journey','Caliber'],
-'FAW':['Bestune T77','Bestune T99','Bestune B70'],
-'FIAT':['500','500X','500L','Punto','Tipo','Doblo','Ducato','Bravo','Panda'],
-'Ford':['EcoSport','Edge','Escape','Explorer','F-150','Fiesta','Focus','Focus RS','Focus ST','Fusion','Galaxy','Ka','Kuga','Mondeo','Mustang','Mustang Mach-E','Puma','Ranger','S-Max','Transit','Transit Connect'],
-'GAC':['GS3','GS4','GS5','GS8','GA4','GA6','Aion V','Aion S'],
-'Geely':['Atlas','Atlas Pro','Coolray','Tugella','Emgrand','Monjaro','Okavango','Preface','Vision X6','Star Era L','Galaxy L7'],
-'Genesis':['G70','G80','G90','GV70','GV80','GV60'],
-'Haval':['F7','F7x','H2','H6','H6 Plus','H9','Jolion','Dargo','Dargo X'],
-'Honda':['Accord','City','Civic','Civic Type R','CR-V','CR-Z','e','Element','Fit','HR-V','Insight','Jazz','Legend','Odyssey','Passport','Pilot','Ridgeline','e:Ny1','ZR-V'],
-'Hummer':['H1','H2','H3'],
-'Hyundai':['Accent','Bayon','Creta','Creta N Line','Elantra','Elantra N','Getz','Grandeur','i10','i20','i20 N','i30','i30 N','i40','Ioniq','Ioniq 5','Ioniq 6','Kona','Kona Electric','Matrix','Nexo','Palisade','Santa Fe','Solaris','Solaris Cross','Sonata','Staria','Tucson','Venue','Veloster','H-1','Porter II'],
-'Infiniti':['Q30','Q50','Q60','Q70','QX30','QX50','QX55','QX60','QX70','QX80','EX','FX','G','M'],
-'JAC':['JS4','JS6','JS8','J7','S3','S7','Sehol E40X','Sehol X4'],
-'Jaguar':['E-Pace','E-Type','F-Pace','F-Type','I-Pace','S-Type','X-Type','XE','XF','XJ'],
-'Jeep':['Cherokee','Compass','Grand Cherokee','Grand Wagoneer','Renegade','Wrangler','Gladiator'],
-'Kia':['Carnival','Cerato','Ceed','EV6','Mohave','Niro','Optima','K5','K8','Picanto','ProCeed','Rio','Rio X','Rio X-Line','Seltos','Seltos X-Line','Sorento','Soul','Sportage','Stinger','Telluride','Xceed','Xceed Cross'],
-'Lamborghini':['Huracan','Urus','Revuelto'],
-'Lada (ВАЗ)':['2101','2102','2103','2104','2105','2106','2107','2108','2109','21099','2110','2111','2112','2113','2114','2115','Granta','Granta Cross','Granta Drive','Vesta','Vesta Cross','Vesta SW','Vesta SW Cross','XRAY','XRAY Cross','Largus','Largus Cross','Niva Legend','Niva Travel','Niva Sport','Kalina','Kalina Cross','Priora'],
-'Land Rover':['Defender','Discovery','Discovery Sport','Freelander','Range Rover','Range Rover Evoque','Range Rover Sport','Range Rover Velar'],
-'Lexus':['CT','ES','GS','GX','IS','LS','LX','NX','RC','RX','UX','LC','LM'],
-'Lincoln':['Aviator','Corsair','MKC','MKX','MKZ','Navigator'],
-'Maserati':['Ghibli','GranTurismo','Grecale','Levante','MC20','Quattroporte'],
-'Mazda':['CX-3','CX-30','CX-5','CX-50','CX-60','CX-8','CX-9','Mazda2','Mazda3','Mazda6','MX-5','MX-30','RX-7','RX-8','323','626','MPV'],
-'Mercedes-Benz':['A 180','A 200','A 220','A 250','A 35 AMG','A 45 AMG','B 180','B 200','B 220','C 180','C 200','C 220','C 250','C 300','C 350','C 43 AMG','C 63 AMG','CLA 180','CLA 200','CLA 250','CLA 35 AMG','CLA 45 AMG','CLS 300','CLS 350','CLS 450','CLS 53 AMG','E 200','E 220','E 250','E 300','E 350','E 400','E 43 AMG','E 53 AMG','E 63 AMG','G 350','G 400','G 500','G 63 AMG','GLA 200','GLA 220','GLA 250','GLA 35 AMG','GLA 45 AMG','GLB 200','GLB 220','GLB 250','GLC 200','GLC 220','GLC 250','GLC 300','GLC 350','GLC 43 AMG','GLC 63 AMG','GLE 300','GLE 350','GLE 400','GLE 450','GLE 53 AMG','GLE 63 AMG','GLS 350','GLS 400','GLS 450','GLS 580','S 350','S 400','S 450','S 500','S 560','S 580','S 63 AMG','S 65 AMG','AMG GT','AMG GT 4','EQA','EQB','EQC','EQE','EQS','SL','SLK','SLC','Sprinter','Vito','V-Class'],
-'MINI':['Cooper','Cooper S','Cooper SE','Clubman','Countryman','Countryman S','Paceman','Roadster','Cabrio'],
-'Mitsubishi':['ASX','Colt','Eclipse Cross','Galant','Grandis','Lancer','Lancer Evolution','L200','L400','Outlander','Outlander PHEV','Outlander Sport','Pajero','Pajero Mini','Pajero Sport','i-MiEV','Carisma','Space Star'],
-'Nissan':['370Z','400Z','Almera','Ariya','Frontier','GT-R','Juke','Juke NISMO','Kicks','Leaf','Magnite','Maxima','Micra','Murano','Navara','Note','Pathfinder','Patrol','Qashqai','Sentra','Terra','Teana','Terrano','Tiida','Titan','X-Trail','X-Terra'],
-'Opel':['Adam','Astra','Astra OPC','Cascada','Corsa','Crossland','Frontera','Grandland','Insignia','Insignia GSi','Meriva','Mokka','Mokka-e','Omega','Signum','Vectra','Vivaro','Zafira'],
-'Peugeot':['107','108','2008','208','208 GTi','3008','301','308','308 GTi','408','508','508 SW','5008','Rifter','Partner','Expert'],
-'Porsche':['718 Boxster','718 Cayman','911','Cayenne','Cayenne Coupe','Macan','Panamera','Taycan'],
-'RAM':['1500','2500','3500','ProMaster'],
-'Renault':['Arkana','Austral','Captur','Clio','Clio RS','Duster','Fluence','Grand Scenic','Kadjar','Kangoo','Koleos','Laguna','Logan','Logan MCV','Master','Megane','Megane RS','Sandero','Sandero Stepway','Scenic','Talisman','Traffic','Zoe'],
-'Rolls-Royce':['Cullinan','Dawn','Ghost','Phantom','Spectre','Wraith'],
-'SEAT':['Arona','Ateca','Ibiza','Leon','Leon ST','Tarraco'],
-'Skoda':['Enyaq','Fabia','Kamiq','Karoq','Kodiaq','Octavia','Octavia RS','Rapid','Scala','Slavia','Superb'],
-'smart':['EQ fortwo','EQ forfour','#1','#3'],
-'SsangYong':['Actyon','Korando','Kyron','Musso','Rexton','Tivoli','XLV'],
-'Subaru':['Ascent','BRZ','Crosstrek','Forester','Impreza','Legacy','Levorg','Outback','Solterra','WRX','WRX STI','XV'],
-'Suzuki':['Across','Baleno','Celerio','Ertiga','Grand Vitara','Ignis','Jimny','Kizashi','S-Cross','SX4','Swift','Swift Sport','Vitara','XL7'],
-'Tesla':['Model 3','Model S','Model X','Model Y','Cybertruck'],
-'Toyota':['4Runner','86','Alphard','Aurion','Avalon','Avensis','Aygo','C-HR','Camry','Corolla','Corolla Cross','Corolla Verso','Crown','FJ Cruiser','Fortuner','GR86','GR Yaris','Hilux','Highlander','Land Cruiser 70','Land Cruiser 80','Land Cruiser 100','Land Cruiser 105','Land Cruiser 200','Land Cruiser 300','Land Cruiser Prado','Prius','Prius Plus','RAV4','RAV4 Prime','Rush','Sequoia','Sienna','Supra','Tundra','Urban Cruiser','Venza','Verso','Yaris','Yaris Cross','bZ4X'],
-'UAZ (УАЗ)':['2206','3303','3909','39625','Hunter','Patriot','Patriot Sport','Pickup','Буханка'],
-'Volkswagen':['Amarok','Arteon','Atlas','Caddy','California','Caravelle','CC','Crafter','Golf','Golf GTI','Golf GTE','Golf R','ID.3','ID.4','ID.5','ID.6','Jetta','Multivan','Passat','Passat CC','Phaeton','Polo','Sharan','T-Cross','T-Roc','Taigo','Taos','Tiguan','Tiguan Allspace','Touareg','Touran','Transporter','Up'],
-'Volvo':['C30','C40','C70','S40','S60','S80','S90','V40','V50','V60','V70','V90','XC40','XC60','XC70','XC90'],
-// Китайские марки
-'BYD':['Atto 3','Han','Song','Seal','Tang','Dolphin','Seagull','Yuan Plus'],
-'Changan':['CS35','CS35 Plus','CS55','CS55 Plus','CS75','CS75 Plus','CS85','Uni-K','Uni-T','Uni-V'],
-'EXEED':['LX','TXL','VX'],
-'Hongqi':['H5','H9','E-HS9','HS5'],
-'Huawei AITO':['M5','M7'],
-'JAECOO':['J7','J8'],
-'Jetour':['Dashing','X70','X70 Plus','X90'],
-'Lixiang (Li Auto)':['L6','L7','L8','L9','Mega'],
-'OMODA':['C5','S5'],
-'Tank':['300','400','500'],
-'Voyah':['Free','Dream'],
-'XCMG':['Hanma H3','Hanma H9'],
-'Xpeng':['G6','G9','P7','P5'],
-// Корейские
-'Genesis':['G70','G80','G90','GV70','GV80','GV60'],
-// Прочие
+'Citroën':['Berlingo','C1','C2','C3','C3 Aircross','C4','C4 Cactus','C4 Picasso','C5','C5 Aircross','C5 X','C6','C8','Jumpy','Saxo','Spacetourer','Xantia','Xsara','Xsara Picasso','ZX'],
+'CUPRA':['Ateca','Born','Formentor','Leon'],
+'Dacia':['Duster','Jogger','Logan','Sandero','Sandero Stepway','Spring'],
+'Daewoo':['Espero','Gentra','Lanos','Leganza','Matiz','Nexia','Nubira','Sens','Tacuma'],
+'Daihatsu':['Cuore','Move','Rocky','Sirion','Terios','YRV'],
+'Dodge':['Caliber','Challenger','Charger','Durango','Journey','Ram 1500','Viper'],
+'DS Automobiles':['DS 3','DS 3 Crossback','DS 4','DS 5','DS 7','DS 7 Crossback','DS 9'],
+'EXEED':['LX','RX','TXL','TX','VX'],
+'FAW':['Bestune B70','Bestune NAT','Bestune T55','Bestune T77','Bestune T99','Vita'],
+'Ferrari':['296 GTB','488','488 GTB','812 Superfast','F8','GTC4Lusso','Portofino','Roma','SF90'],
+'FIAT':['500','500X','500L','Albea','Bravo','Croma','Doblo','Ducato','Freemont','Grande Punto','Linea','Palio','Panda','Punto','Siena','Stilo','Tipo'],
+'Ford':['Bronco','C-Max','EcoSport','Edge','Escape','Explorer','F-150','Fiesta','Focus','Focus RS','Focus ST','Fusion','Galaxy','Ka','Kuga','Mondeo','Mustang','Mustang Mach-E','Puma','Ranger','S-Max','Territory','Tourneo Connect','Transit','Transit Connect','Transit Custom'],
+'GAC':['Aion LX','Aion S','Aion V','Aion Y','Empow 55','GS3','GS4','GS5','GS8','GA4','GA6','Trumpchi M8'],
+'ГАЗ':['21 Волга','24 Волга','24-10','3102','3110','31105','Волга Сайбер','Газель','Газель Next','Газель NN','Газон Next','Соболь','Баргузин','Победа'],
+'Geely':['Atlas','Atlas Pro','Atlas L','Coolray','Emgrand','Emgrand EC7','Emgrand X7','GC5','GC6','MK','MK Cross','Monjaro','Okavango','Preface','Star Era L','Tugella','Vision','Vision X6','Galaxy E8','Galaxy L7'],
+'Genesis':['G70','G80','G90','GV60','GV70','GV80','Electrified G80','Electrified GV70'],
+'Great Wall':['Wingle 5','Wingle 7','Hover H3','Hover H5','Hover H6','Safe'],
+'Haval':['Dargo','Dargo X','F7','F7x','H1','H2','H2s','H4','H6','H6 Plus','H9','Jolion','Jolion Pro','Raptor'],
+'Honda':['Accord','Civic','Civic Type R','CR-V','Element','Fit','FR-V','HR-V','Insight','Jazz','Legend','Life','Odyssey','Pilot','Ridgeline','Stream','StepWGN','Spirior','Freed','City','ZR-V'],
+'Hongqi':['E-HS9','H5','H9','HS5','HS7','EH7','H6'],
+'Hummer':['H1','H2','H3','EV'],
+'Hyundai':['Accent','Atos','Avante','Bayon','Coupe','Creta','Creta N Line','Dynasty','Elantra','Elantra N','Galloper','Getz','Grace','Grandeur','i10','i20','i20 N','i30','i30 N','i40','Ioniq','Ioniq 5','Ioniq 5 N','Ioniq 6','Ix35','ix20','ix55','Kona','Kona Electric','Kona N','Lantra','Lavita','Matrix','Nexo','Palisade','Porter II','Santa Cruz','Santa Fe','Solaris','Solaris Cross','Sonata','Starex','Staria','Terracan','Trajet','Tucson','Tucson N Line','Venue','Veloster','XG','H-1','H100'],
+'ИЖ':['2125','2715','412','Ода'],
+'Infiniti':['EX35','EX37','FX35','FX37','FX45','FX50','G35','G37','M35','M37','M56','Q30','Q45','Q50','Q50S','Q60','Q70','QX30','QX50','QX55','QX56','QX60','QX70','QX80'],
+'Isuzu':['Axiom','D-Max','MU-7','MU-X','Rodeo','Trooper'],
+'JAC':['J7','JS3','JS4','JS6','JS8','S3','S4','S5','S7','T6','T8','Sehol A5 Plus','Sehol E40X','Sehol X4'],
+'Jaguar':['E-Pace','F-Pace','F-Type','I-Pace','S-Type','X-Type','XE','XEL','XF','XFL','XJ','XJL','XK','XKR'],
+'JAECOO':['J6','J7','J8'],
+'Jeep':['Cherokee','Compass','Gladiator','Grand Cherokee','Grand Cherokee L','Patriot','Renegade','Wrangler'],
+'Jetour':['Dashing','T2','X70','X70 Plus','X70S','X90','X90 Plus'],
+'КамАЗ':['4308','43118','53215','6520','Компас 5','Компас 9'],
+'Kia':['Carens','Carnival','Cerato','Ceed','Ceed GT','EV6','K3','K5','K8','K9','Magentis','Mohave','Morning','Niro','Niro EV','Opirus','Optima','Picanto','ProCeed','Quoris','Ray','Rio','Rio X','Rio X-Line','Seltos','Seltos X-Line','Sonet','Sorento','Sorento PHEV','Soul','Sportage','Sportage GT','Stinger','Stonic','Telluride','Xceed','Clarus','Shuma','Spectra'],
+'Lada (ВАЗ)':['2101','2102','2103','2104','2105','2106','2107','2108','2109','21093','21099','2110','2111','2112','2113','2114','2115','4x4 Urban','Granta','Granta Cross','Granta Drive','Granta Sport','Granta Liftback','Largus','Largus Cross','Niva Legend','Niva Travel','Niva Sport','Vesta','Vesta Cross','Vesta SW','Vesta SW Cross','Vesta Sport','XRAY','XRAY Cross','Kalina','Kalina Cross','Kalina Sport','Priora','Priora Sport'],
+'Lamborghini':['Aventador','Huracan','Huracan EVO','Urus','Urus S','Urus Performante','Revuelto'],
+'Land Rover':['Defender 90','Defender 110','Defender 130','Discovery','Discovery 3','Discovery 4','Discovery 5','Discovery Sport','Freelander','Freelander 2','Range Rover','Range Rover Evoque','Range Rover Sport','Range Rover Velar','Series II','Series III'],
+'Lexus':['CT 200h','ES 200','ES 250','ES 300h','ES 350','GS 200t','GS 250','GS 300','GS 350','GS 450h','GX 400','GX 460','IS 200','IS 250','IS 300','IS 350','IS 300h','IS F','LC 500','LC 500h','LS 400','LS 430','LS 460','LS 500','LX 450','LX 450d','LX 470','LX 570','LX 600','NX 200','NX 200t','NX 300','NX 300h','NX 350h','RC 200t','RC 300','RC 350','RC F','RX 300','RX 330','RX 350','RX 350h','RX 400h','RX 450h','RX 500h','TX 350','TX 500h','UX 200','UX 250h'],
+'Lifan':['Breez','Cebrium','MyWay','Murman','Smily','Solano','X50','X60','X70'],
+'Lincoln':['Aviator','Continental','Corsair','MKC','MKS','MKT','MKX','MKZ','Nautilus','Navigator'],
+'Lixiang (Li Auto)':['L6','L7','L8','L9','Mega','One'],
+'Maserati':['Ghibli','GranCabrio','GranTurismo','Grecale','Levante','MC20','Quattroporte'],
+'Mazda':['323','323F','626','Atenza','Axela','BT-50','CX-3','CX-30','CX-5','CX-7','CX-9','MPV','Mazda2','Mazda3','Mazda6','MX-5','MX-30','Premacy','RX-7','RX-8','Tribute','Verisa'],
+'Mercedes-Benz':['190','230','260','300','A 160','A 170','A 180','A 200','A 220','A 250','A 35 AMG','A 45 AMG','B 170','B 180','B 200','B 220','C 180','C 200','C 220','C 230','C 240','C 250','C 270','C 280','C 300','C 320','C 350','C 43 AMG','C 55 AMG','C 63 AMG','C 63 S AMG','CL 500','CL 600','CL 63 AMG','CLA 180','CLA 200','CLA 250','CLA 35 AMG','CLA 45 AMG','CLC 160','CLK 200','CLK 240','CLK 280','CLK 320','CLK 350','CLK 500','CLS 300','CLS 320','CLS 350','CLS 450','CLS 500','CLS 53 AMG','CLS 55 AMG','CLS 63 AMG','E 200','E 220','E 230','E 240','E 250','E 270','E 280','E 300','E 320','E 350','E 400','E 420','E 430','E 43 AMG','E 50 AMG','E 53 AMG','E 55 AMG','E 63 AMG','G 270','G 300','G 320','G 350','G 400','G 500','G 55 AMG','G 63 AMG','G 65 AMG','GLA 180','GLA 200','GLA 220','GLA 250','GLA 35 AMG','GLA 45 AMG','GLB 200','GLB 220','GLB 250','GLC 200','GLC 220','GLC 250','GLC 300','GLC 350','GLC 43 AMG','GLC 63 AMG','GLE 250','GLE 300','GLE 350','GLE 400','GLE 450','GLE 53 AMG','GLE 63 AMG','GLK 200','GLK 220','GLK 250','GLK 280','GLK 300','GLK 350','GLS 350','GLS 400','GLS 450','GLS 500','GLS 580','ML 230','ML 270','ML 280','ML 300','ML 320','ML 350','ML 400','ML 430','ML 500','ML 55 AMG','ML 63 AMG','R 280','R 300','R 320','R 350','R 500','S 280','S 300','S 320','S 350','S 400','S 420','S 430','S 450','S 500','S 550','S 560','S 580','S 600','S 63 AMG','S 65 AMG','SL 280','SL 300','SL 320','SL 350','SL 400','SL 500','SL 55 AMG','SL 600','SL 63 AMG','SLK 200','SLK 230','SLK 250','SLK 280','SLK 300','SLK 320','SLK 350','SLK 55 AMG','AMG GT','AMG GT C','AMG GT R','AMG GT S','AMG GT 4','EQA 250','EQB 250','EQC 400','EQE 350','EQS 450','Maybach S 450','Maybach S 500','Maybach S 560','Maybach S 580','Maybach S 650','Maybach GLS 600','Sprinter','Vito','V 200','V 220','V 250','Marco Polo'],
+'MG':['3','4','5','6','7','Comet','EHS','HS','Marvel R','One','ZS','ZS EV'],
+'MINI':['Cabrio','Clubman','Cooper','Cooper S','Cooper SE','Countryman','Countryman S','Countryman SE','JCW','Paceman','Roadster','Coupe','Aceman'],
+'Mitsubishi':['3000GT','ASX','Colt','Carisma','Eclipse','Eclipse Cross','Galant','Grandis','Grunder','L200','L300','L400','Lancer','Lancer Evolution','Lancer Sportback','Montero','Montero Sport','Outlander','Outlander PHEV','Outlander Sport','Pajero','Pajero iO','Pajero Mini','Pajero Pinin','Pajero Sport','Sigma','Space Runner','Space Star','Space Wagon','i-MiEV'],
+'Москвич':['401','402','403','407','408','412','2140','2141','3','5','6'],
+'Nissan':['100NX','180SX','200SX','300ZX','350Z','370Z','400Z','Almera','Almera Classic','Almera Tino','Ariya','Bluebird','Cefiro','Expert','Frontier','GT-R','Juke','Juke NISMO','Kicks','Leaf','Magnite','Maxima','Micra','Murano','Navara','Note','Pathfinder','Patrol','Pickup','Primera','Qashqai','Qashqai+2','Safari','Sentra','Serena','Silvia','Skyline','Sunny','Teana','Terrano','Tiida','Titan','Wingroad','X-Trail'],
+'OMODA':['C5','S5','C9'],
+'Opel':['Adam','Agila','Antara','Astra','Astra OPC','Astra Caravan','Calibra','Cascada','Corsa','Crossland','Frontera','Grandland','Insignia','Insignia GSi','Meriva','Mokka','Mokka-e','Omega','Rekord','Signum','Sintra','Vectra','Vivaro','Zafira','Zafira Tourer'],
+'Peugeot':['1007','106','107','108','2008','205','206','207','208','208 GTi','3008','301','306','307','308','308 GTi','308 SW','4007','4008','405','406','407','408','5008','508','508 SW','Expert','Partner','RCZ','Rifter','Traveller'],
+'Porsche':['718 Boxster','718 Cayman','718 Cayman GT4','911','911 Carrera','911 Carrera 4','911 GT3','911 GT3 RS','911 Turbo','911 Turbo S','928','944','968','Boxster','Cayenne','Cayenne Coupe','Cayenne E-Hybrid','Cayman','Macan','Macan S','Macan GTS','Macan Turbo','Panamera','Panamera S','Panamera 4S','Panamera GTS','Panamera Turbo','Taycan','Taycan 4S','Taycan GTS','Taycan Turbo'],
+'RAM':['1500','1500 TRX','2500','3500','ProMaster'],
+'Renault':['Arkana','Austral','Captur','Clio','Clio RS','Dokker','Duster','Espace','Fluence','Grand Scenic','Kadjar','Kangoo','Koleos','Laguna','Laguna Coupe','Latitude','Logan','Logan MCV','Master','Megane','Megane RS','Megane Coupe','Sandero','Sandero Stepway','Scenic','Symbol','Talisman','Traffic','Twingo','Vel Satis','Zoe'],
+'Rolls-Royce':['Cullinan','Dawn','Ghost','Phantom','Phantom EWB','Silver Shadow','Silver Seraph','Spectre','Wraith'],
+'Rover':['25','45','75','200','400','600','800','Metro'],
+'SEAT':['Arona','Ateca','Cordoba','Ibiza','Leon','Leon ST','Tarraco','Toledo'],
+'Skoda':['Citigo','Enyaq','Fabia','Kamiq','Karoq','Kodiaq','Octavia','Octavia RS','Rapid','Roomster','Scala','Superb','Yeti'],
+'smart':['Fortwo','Forfour','EQ Fortwo','EQ Forfour','#1','#3'],
+'SsangYong':['Actyon','Actyon Sports','Korando','Kyron','Musso','Musso Grand','Nomad','Rexton','Rexton Sports','Tivoli','Tivoli XLV'],
+'Subaru':['Ascent','BRZ','Crosstrek','Forester','Impreza','Justy','Legacy','Legacy Outback','Levorg','Outback','SVX','Solterra','Tribeca','WRX','WRX STI','XV'],
+'Suzuki':['Across','Alto','Baleno','Celerio','Ertiga','Escudo','Grand Vitara','Ignis','Jimny','Jimny Sierra','Kizashi','Liana','S-Cross','SX4','Swift','Swift Sport','Vitara','Vitara Brezza','Wagon R','XL7'],
+'Tank':['300','300 PHEV','400','400 PHEV','500','500 PHEV'],
+'Tesla':['Cybertruck','Model 3','Model 3 Highland','Model S','Model S Plaid','Model X','Model X Plaid','Model Y','Roadster'],
+'Toyota':['4Runner','86','Allion','Alphard','Altezza','Aristo','Aurion','Avalon','Avensis','Avensis Verso','Aygo','bZ4X','Blade','C-HR','Caldina','Camry','Camry Solara','Carina','Carina E','Carina ED','Celica','Corolla','Corolla Cross','Corolla Levin','Corolla Spacio','Corolla Touring Sports','Corolla Verso','Crown','Crown Crossover','Crown Sport','Dyna','Echo','Estima','FJ Cruiser','Fortuner','Funcargo','GR86','GR Supra','GR Yaris','Harrier','Hiace','Hiace Regius','Highlander','Hilux','Ipsum','Ist','Kluger','Land Cruiser 40','Land Cruiser 55','Land Cruiser 60','Land Cruiser 70','Land Cruiser 80','Land Cruiser 100','Land Cruiser 105','Land Cruiser 200','Land Cruiser 300','Land Cruiser Prado 78','Land Cruiser Prado 90','Land Cruiser Prado 120','Land Cruiser Prado 150','Land Cruiser Prado 250','Mark II','Mark X','Matrix','Mirai','Nadia','Noah','Opa','Passo','Platz','Premio','Previa','Prius','Prius Plus','Prius Prime','Probox','Progres','RAV4','RAV4 Prime','Raum','Regius','Rush','Sequoia','Sienna','Solara','Soarer','Sprinter','Sprinter Carib','Supra','Tacoma','Town Ace','Tundra','Urban Cruiser','Vellfire','Venza','Verso','Vios','Vista','Vitz','Voltz','Yaris','Yaris Cross','Yaris GR','Zelas'],
+'UAZ (УАЗ)':['469','3151','3152','3153','3159','3162 Simbir','3303','3962','Cargo','Hunter','Patriot','Patriot Sport','Pickup','Буханка'],
+'Volkswagen':['Amarok','Arteon','Atlas','Beetle','Bora','Caddy','Caravelle','CC','Crafter','Eos','Golf','Golf GTI','Golf GTE','Golf GTD','Golf R','Golf Alltrack','Golf Cabriolet','Golf Plus','Golf Sportsvan','ID.3','ID.4','ID.4 GTX','ID.5','ID.6','ID.7','Jetta','LT','Lupo','Multivan','Passat','Passat Alltrack','Passat CC','Passat GTE','Phaeton','Polo','Polo GTI','Scirocco','Sharan','T4 Caravelle','T4 Multivan','T5 Caravelle','T5 Multivan','T5 Transporter','T6 Caravelle','T6 Multivan','T6 Transporter','T-Cross','T-Roc','T-Roc R','Taigo','Taos','Tiguan','Tiguan Allspace','Tiguan R','Touareg','Touareg R','Touran','Transporter','Up','Vento'],
+'Volvo':['C30','C40 Recharge','C70','EX30','EX40','EX90','S40','S60','S60 Recharge','S70','S80','S90','S90 Recharge','V40','V40 Cross Country','V50','V60','V60 Recharge','V70','V90','V90 Recharge','XC40','XC40 Recharge','XC60','XC60 Recharge','XC70','XC90','XC90 Recharge'],
+'Voyah':['Dream','Free','Passion'],
+'Xpeng':['G3','G6','G9','P5','P7','P7i','X9'],
+'Zeekr':['001','007','009','X'],
+'ЗАЗ':['965','966','968','Таврия','Славута','Sens','Forza'],
+'ЗИЛ':['130','131','157'],
 'Другое':['Другая модель']
 };
+
+
 
 
 const DEFAULT_REVIEWS=[
@@ -1167,7 +1188,19 @@ async function doForgotReset(){
 function toggleDrop(){document.getElementById('uav').classList.toggle('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('#uav'))document.getElementById('uav').classList.remove('open');});
 
-function setFilter(t,btn){cFilter=t;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');filterOrgs();}
+function setFilter(t,btn){
+  cFilter=t;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else {
+    // find button by filter type
+    const map={'all':0,'service':1,'evac':2,'parts':3};
+    const idx=map[t]||0;
+    const btns=document.querySelectorAll('.filter-btn');
+    if(btns[idx]) btns[idx].classList.add('active');
+  }
+  filterOrgs();
+}
 function setView(v,btn){cView=v;document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('orgsGrid').className=v==='grid'?'orgs-grid-view':'orgs-list-view';filterOrgs();}
 function filterOrgs(){
   const q=(document.getElementById('searchInput').value||'').toLowerCase();
@@ -1260,6 +1293,29 @@ function renderGarage(){
   if(!cars.length){emp.style.display='';grid.innerHTML='';document.getElementById('garageHint').textContent='';return;}
   emp.style.display='none';document.getElementById('garageHint').textContent='Автомобилей: '+cars.length;
   grid.innerHTML=cars.map((c,i)=>`<div class="car-card"><span class="car-emoji">${EMOJIS[i%EMOJIS.length]}</span><div class="car-name">${c.make} ${c.model}</div><div class="car-info">${c.year} · ${parseInt(c.mileage||0).toLocaleString()} км · ${c.engine}</div><div class="to-list">${TO_ITEMS.map(t=>{const s=getToSt(c.mileage,t.km);return`<div class="to-row"><span class="to-name">${t.name}</span><div style="text-align:right"><div class="to-badge ${s.cls}">${s.label}</div><div style="font-size:11px;color:var(--gray);margin-top:1px">${s.km}</div></div></div>`;}).join('')}</div><div class="car-actions"><button class="car-btn cbe" onclick="openEditCar(${i})">✏️ Редактировать</button><button class="car-btn cbd" onclick="deleteCar(${i})">🗑️ Удалить</button></div></div>`).join('');
+}
+
+function callEvacuator(){
+  // Show evacuator orgs and let user call directly
+  showPage('catalog');
+  setTimeout(()=>{
+    setFilter('evac', document.querySelector('.filter-btn:nth-child(3)'));
+    // Show toast with first evacuator number
+    const evac = ORGS.find(o=>o.type==='evac');
+    if(evac){
+      showToast('Ближайший: '+evac.name+' — '+evac.phone, true);
+      // Open call dialog
+      setTimeout(()=>{ window.location.href='tel:'+evac.phone.replace(/\D/g,'').replace(/^8/,'+7'); }, 1500);
+    }
+  }, 300);
+}
+
+function callTechHelp(){
+  showPage('catalog');
+  setTimeout(()=>{
+    setFilter('evac', document.querySelectorAll('.filter-btn')[2]);
+    showToast('Выберите службу и нажмите "Позвонить"', true);
+  }, 300);
 }
 
 function openMaps(name, addr){
