@@ -1647,9 +1647,8 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 let tT;
 function showToast(msg,green){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(green?' green':' redbg');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),3000);}
 function downloadAPK(){
-  const apkUrl = DB.get('apkUrl') || '';
-  if(apkUrl){ window.open(apkUrl,'_blank'); }
-  else { showToast('Ссылка на APK будет добавлена позже',false); }
+  const APK_URL = 'https://github.com/Dmitry631-wq/auto-helper-abakan/releases/download/v1.0.0/app-release.apk';
+  window.open(APK_URL, '_blank');
 }
 
 const revEls=document.querySelectorAll('.reveal');
