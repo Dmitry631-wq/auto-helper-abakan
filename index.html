@@ -226,11 +226,11 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
       <button class="tab-auth" onclick="switchAuthTab('register')">Регистрация</button>
     </div>
     <div id="loginForm">
-      <div class="fg"><label>Email</label><input type="email" id="loginEmail" placeholder="ivan@mail.ru"></div>
-      <div class="fg"><label>Пароль</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+      <div class="fg"><label>Email или телефон</label><input type="text" id="loginEmail" placeholder="ivan@mail.ru или +7 900..."></div>
+      <div class="fg"><label>Пароль</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <div class="ferr" id="loginError"></div>
-      <button class="btn btn-dark" onclick="doLogin()">Войти</button>
-      <button class="btn btn-outline" onclick="showToast('Ссылка для восстановления отправлена',true)">Забыли пароль?</button>
+      <button class="btn btn-dark" id="loginBtn" onclick="doLogin()">Войти</button>
+      <button class="btn btn-outline" onclick="closeModal('authModal');openModal('forgotModal')">Забыли пароль?</button>
     </div>
     <div id="registerForm" style="display:none">
       <div class="fg"><label>Имя</label><input type="text" id="regName" placeholder="Иван Иванов"></div>
@@ -238,7 +238,7 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
       <div class="fg"><label>Телефон</label><input type="tel" id="regPhone" placeholder="+7 900 000 0000"></div>
       <div class="fg"><label>Пароль</label><input type="password" id="regPass" placeholder="Минимум 6 символов"></div>
       <div class="ferr" id="regError"></div><div class="fsuc" id="regSuccess"></div>
-      <button class="btn btn-dark" onclick="doRegister()">Создать аккаунт</button>
+      <button class="btn btn-dark" id="registerBtn" onclick="doRegister()">Создать аккаунт</button>
     </div>
   </div>
 </div>
@@ -252,11 +252,6 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
     <div class="fg"><label>Марка</label>
       <select id="carMake" onchange="updateModels()">
         <option value="">— Выберите марку —</option>
-        <option>Toyota</option><option>Lada (ВАЗ)</option><option>Hyundai</option><option>Kia</option>
-        <option>Volkswagen</option><option>Ford</option><option>Nissan</option><option>Mitsubishi</option>
-        <option>BMW</option><option>Mercedes-Benz</option><option>Audi</option><option>Renault</option>
-        <option>Mazda</option><option>Honda</option><option>Subaru</option><option>Chevrolet</option>
-        <option>Skoda</option><option>Opel</option><option>Suzuki</option><option>Другое</option>
       </select>
     </div>
     <div class="fg"><label>Модель</label><select id="carModelSel"><option value="">— Сначала выберите марку —</option></select></div>
@@ -309,6 +304,46 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
     <div class="fg"><label>Город</label><input type="text" id="epCity" placeholder="Абакан"></div>
     <div class="fg"><label>Новый пароль (оставьте пустым, чтобы не менять)</label><input type="password" id="epPass" placeholder="••••••••"></div>
     <button class="btn btn-dark" style="margin-top:8px" onclick="saveProfile()">Сохранить</button>
+  </div>
+</div>
+
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="overlay" id="forgotModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('forgotModal')">✕</button>
+    <h2 id="forgotTitle">Восстановление доступа</h2>
+    <div class="modal-sub" id="forgotSub">Введите email, указанный при регистрации</div>
+
+    <!-- Step 1: enter email -->
+    <div id="forgotStep1">
+      <div class="fg"><label>Email</label><input type="email" id="forgotEmail" placeholder="ivan@mail.ru" onkeydown="if(event.key==='Enter')doForgotSend()"></div>
+      <div class="ferr" id="forgotError"></div>
+      <button class="btn btn-dark" id="forgotSendBtn" onclick="doForgotSend()">Отправить код на email</button>
+      <button class="btn btn-outline" style="margin-top:10px" onclick="closeModal('forgotModal');openModal('authModal')">← Назад ко входу</button>
+    </div>
+
+    <!-- Step 2: enter code -->
+    <div id="forgotStep2" style="display:none">
+      <div style="padding:12px 14px;background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.3);border-radius:12px;margin-bottom:16px;font-size:13px;color:#2E7D32">
+        ✅ Код отправлен на ваш email. Проверьте папку «Входящие» и «Спам».
+      </div>
+      <div class="fg"><label>Код из письма (4 цифры)</label><input type="text" id="forgotCode" placeholder="1234" maxlength="4" inputmode="numeric" onkeydown="if(event.key==='Enter')doForgotVerify()"></div>
+      <div class="ferr" id="forgotCodeError"></div>
+      <button class="btn btn-dark" onclick="doForgotVerify()">Подтвердить код</button>
+      <button class="btn btn-outline" style="margin-top:8px" onclick="doForgotSend()">Отправить код повторно</button>
+    </div>
+
+    <!-- Step 3: new password -->
+    <div id="forgotStep3" style="display:none">
+      <div style="padding:12px 14px;background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.3);border-radius:12px;margin-bottom:16px;font-size:13px;color:#2E7D32">
+        ✅ Код подтверждён! Введите новый пароль.
+      </div>
+      <div class="fg"><label>Новый пароль</label><input type="password" id="forgotNewPass" placeholder="Минимум 6 символов" onkeydown="if(event.key==='Enter')doForgotReset()"></div>
+      <div class="fg"><label>Повторите пароль</label><input type="password" id="forgotNewPass2" placeholder="Повторите пароль" onkeydown="if(event.key==='Enter')doForgotReset()"></div>
+      <div class="ferr" id="forgotPassError"></div>
+      <button class="btn btn-dark" onclick="doForgotReset()">Сохранить новый пароль</button>
+    </div>
   </div>
 </div>
 
@@ -450,7 +485,10 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
 <div class="page" id="page-reviews">
   <div class="page-header"><h1>Отзывы</h1><p>Реальные отзывы пользователей об организациях</p></div>
   <div class="reviews-container">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="btn-nav" onclick="requireAuth(()=>openReviewModal(-1))">+ Написать отзыв</button></div>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
+      <div class="search-box" style="flex:1;min-width:200px"><input type="text" id="reviewSearch" placeholder="Поиск по организации..." oninput="filterReviews()"></div>
+      <button class="btn-nav" onclick="requireAuth(()=>openReviewModal(-1))">+ Написать отзыв</button>
+    </div>
     <div id="reviewsWrap"></div>
   </div>
 </div>
@@ -468,7 +506,12 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
     <div class="profile-card">
       <div class="p-avatar" id="pAvatar">И</div>
       <div class="p-name" id="pName">—</div><div class="p-email" id="pEmail">—</div>
-      <div style="margin-top:16px"><button class="btn-nav" onclick="openEditProfile()">✏️ Редактировать профиль</button></div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-nav" onclick="openEditProfile()">✏️ Редактировать профиль</button>
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;background:rgba(196,168,130,.12);border-radius:10px;font-size:12px;color:var(--gray);line-height:1.6">
+        ℹ️ Данные хранятся локально в браузере. Для синхронизации между устройствами используйте функцию <b>Экспорт данных</b> в настройках.
+      </div>
     </div>
     <div class="profile-card"><h3>📄 Документы</h3><div id="docsWrap"></div></div>
     <div class="profile-card">
@@ -507,6 +550,36 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
 <script>
 const DB={get(k){try{return JSON.parse(localStorage.getItem('ah_'+k))}catch{return null}},set(k,v){localStorage.setItem('ah_'+k,JSON.stringify(v))},push(k,i){const a=DB.get(k)||[];a.push(i);DB.set(k,a);return a}};
 
+// ══ API CONFIG ══
+const API = 'https://auto-helper-backend-production.up.railway.app/api/users';
+
+function getToken(){ return DB.get('access_token')||''; }
+function getRefresh(){ return DB.get('refresh_token')||''; }
+
+async function apiCall(url, method='GET', body=null, auth=false){
+  const headers = {'Content-Type':'application/json'};
+  if(auth){ const t=getToken(); if(t) headers['Authorization']='Bearer '+t; }
+  const opts = {method, headers};
+  if(body) opts.body = JSON.stringify(body);
+  try {
+    let r = await fetch(url, opts);
+    // Try token refresh if 401
+    if(r.status===401 && auth && getRefresh()){
+      const rr = await fetch(API+'/refresh/', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refresh:getRefresh()})});
+      if(rr.ok){
+        const rd = await rr.json();
+        DB.set('access_token', rd.access);
+        headers['Authorization']='Bearer '+rd.access;
+        r = await fetch(url, {method,headers,body:opts.body});
+      }
+    }
+    const data = await r.json().catch(()=>({}));
+    return {ok: r.ok, status: r.status, data};
+  } catch(e){
+    return {ok:false, status:0, data:{detail:'Нет соединения с сервером'}};
+  }
+}
+
 const ORGS=[
   // Автосервисы — 14
   {name:'Fit Service',type:'service',phone:'+7 390 200-01-01',hours:'8:00–20:00',dist:'1.2 км',addr:'ул. Пушкина, 12'},
@@ -540,31 +613,79 @@ const ORGS=[
 ];
 
 const CAR_MODELS={
-'Toyota':['Camry','Corolla','Corolla Cross','RAV4','Land Cruiser 200','Land Cruiser Prado','Land Cruiser 300','Highlander','Fortuner','Yaris','Yaris Cross','Venza','C-HR','Hilux','Tundra','4Runner','Sequoia','Sienna','Avalon','GT86','GR86','Land Cruiser 80','Land Cruiser 100','Land Cruiser 105'],
-'Lada (ВАЗ)':['Granta','Granta Cross','Vesta','Vesta Cross','Vesta SW','Vesta SW Cross','XRAY','XRAY Cross','Largus','Largus Cross','Niva Legend','Niva Travel','Kalina','Priora','2107','2106','2105','2104','2103','2101','2109','21099','2110','2111','2112','2113','2114','2115'],
-'Hyundai':['Solaris','Solaris Cross','Tucson','Creta','Creta N Line','Santa Fe','Elantra','Elantra N','i30','i30 N','i20','i10','Sonata','Grandeur','Palisade','Venue','Kona','Nexo','Staria','H-1','Porter II'],
-'Kia':['Rio','Rio X','Rio X-Line','Sportage','Cerato','Sorento','Optima','K5','Picanto','Stinger','Seltos','Telluride','Carnival','EV6','Ceed','XCeed','ProCeed','Niro','Soul','Mohave'],
-'Volkswagen':['Polo','Polo Sedan','Tiguan','Tiguan Allspace','Passat','Passat CC','Golf','Golf GTI','Golf R','Jetta','Touareg','Touran','Sharan','T-Cross','T-Roc','Taos','ID.4','ID.6','Phaeton','Multivan','Transporter','Caravelle','Amarok'],
-'Ford':['Focus','Focus ST','Focus RS','Kuga','Mondeo','Explorer','EcoSport','Ranger','F-150','Edge','Bronco','Escape','Fusion','Mustang','Mustang Mach-E','Puma','Fiesta','Galaxy','S-Max','Transit'],
-'Nissan':['Qashqai','X-Trail','Juke','Almera','Navara','Pathfinder','Murano','Patrol','Teana','Sentra','Tiida','Note','Micra','Leaf','Ariya','Terra','Kicks','Magnite','GT-R','370Z'],
-'Mitsubishi':['Lancer','Lancer Evolution','Outlander','Outlander PHEV','Outlander Sport','Pajero','Pajero Sport','Pajero Mini','ASX','Eclipse Cross','L200','Galant','Colt','Carisma','Grandis','i-MiEV'],
-'BMW':['116i','118i','120i','316i','318i','320i','325i','328i','330i','335i','418i','420i','520i','523i','525i','528i','530i','535i','540i','550i','730i','740i','750i','X1','X2','X3','X4','X5','X6','X7','Z4','M2','M3','M4','M5','i3','i4','iX'],
-'Mercedes-Benz':['A 180','A 200','B 180','B 200','C 180','C 200','C 220','C 250','C 300','E 200','E 220','E 250','E 300','E 350','S 350','S 400','S 450','S 500','GLA 200','GLB 200','GLC 200','GLC 300','GLE 300','GLE 350','GLE 400','GLS 400','G 350','G 500','CLA 200','CLS 300','AMG C 63','AMG E 63','AMG GT','EQC','EQS'],
-'Audi':['A1','A3','A3 Sportback','A4','A4 Avant','A4 Allroad','A5','A5 Sportback','A6','A6 Avant','A6 Allroad','A7','A8','Q2','Q3','Q3 Sportback','Q5','Q5 Sportback','Q7','Q8','TT','TTS','TT RS','R8','RS3','RS4','RS5','RS6','RS7','e-tron','Q4 e-tron'],
-'Renault':['Logan','Logan MCV','Duster','Sandero','Sandero Stepway','Kaptur','Megane','Megane RS','Scenic','Grand Scenic','Talisman','Laguna','Clio','Clio RS','Fluence','Koleos','Arkana','Zoe','Kangoo','Master','Traffic'],
-'Mazda':['CX-3','CX-30','CX-5','CX-60','CX-8','CX-9','Mazda2','Mazda3','Mazda6','MX-5','MX-30','RX-8','626','323'],
-'Honda':['Civic','Civic Type R','CR-V','Accord','Pilot','HR-V','Jazz','Fit','City','Legend','Insight','Ridgeline','Odyssey','Passport','e:Ny1'],
-'Subaru':['Forester','Outback','Impreza','XV','Legacy','WRX','WRX STI','BRZ','Crosstrek','Ascent','Levorg','Solterra'],
-'Chevrolet':['Cruze','Captiva','Niva','Tahoe','Traverse','Equinox','Malibu','Spark','Aveo','Cobalt','Orlando','Trailblazer','Camaro','Corvette'],
-'Skoda':['Octavia','Octavia RS','Superb','Kodiaq','Karoq','Rapid','Scala','Fabia','Kamiq','Enyaq'],
-'Opel':['Astra','Astra OPC','Insignia','Insignia GSi','Mokka','Mokka-e','Zafira','Corsa','Grandland','Crossland','Vectra','Meriva'],
-'Suzuki':['Vitara','Swift','Swift Sport','Jimny','SX4','S-Cross','Across','Ignis','Baleno','Celerio','Ertiga','Grand Vitara'],
-'УАЗ':['Patriot','Hunter','Буханка','Пикап','3909','2206','39625'],
-'Geely':['Atlas','Atlas Pro','Coolray','Tugella','Emgrand','Monjaro','Okavango'],
-'Haval':['F7','F7x','H6','H9','Jolion','Dargo','M6'],
-'Chery':['Tiggo 4','Tiggo 4 Pro','Tiggo 7','Tiggo 7 Pro','Tiggo 8','Tiggo 8 Pro','Arrizo 5','Arrizo 8'],
+'Abarth':['500','595','695','124 Spider'],
+'Alfa Romeo':['Giulia','Stelvio','Tonale','147','156','159','Giulietta','Spider','GT'],
+'Audi':['A1','A2','A3','A3 Sportback','A4','A4 Avant','A4 Allroad','A5','A5 Sportback','A6','A6 Avant','A6 Allroad','A7','A8','Q2','Q3','Q3 Sportback','Q5','Q5 Sportback','Q7','Q8','Q8 e-tron','TT','TTS','TT RS','R8','RS3','RS4','RS5','RS6','RS7','S3','S4','S5','S6','S7','S8','e-tron','Q4 e-tron','SQ5','SQ7','SQ8'],
+'BMW':['116i','118i','118d','120i','120d','125i','128ti','M135i','218i','220i','225i','228i','316i','318i','320i','323i','325i','328i','330i','335i','340i','M340i','418i','420i','420d','425i','430i','435i','440i','520i','523i','525i','525d','528i','530i','535i','540i','545i','550i','M550i','630i','640i','650i','730i','730d','740i','740d','750i','760i','X1','X2','X3','X3 M','X4','X4 M','X5','X5 M','X6','X6 M','X7','Z4','M2','M3','M4','M5','M8','i3','i4','i5','i7','iX','iX1','iX3'],
+'Chevrolet':['Aveo','Cobalt','Cruze','Epica','Equinox','Captiva','Lacetti','Lanos','Malibu','Niva','Orlando','Spark','Tahoe','Tracker','Trailblazer','Traverse','Camaro','Corvette','Sonic','Trax'],
+'Chery':['Tiggo 2','Tiggo 4','Tiggo 4 Pro','Tiggo 7','Tiggo 7 Pro','Tiggo 8','Tiggo 8 Pro','Tiggo 8 Pro Max','Arrizo 5','Arrizo 6','Arrizo 8','Omoda 5','Omoda C5'],
+'Chrysler':['300','300C','Pacifica','Voyager','Sebring','PT Cruiser'],
+'Citroën':['C1','C2','C3','C3 Aircross','C4','C4 Cactus','C4 Picasso','C5','C5 Aircross','C5 X','Berlingo','Jumpy','Spacetourer'],
+'Dacia':['Logan','Sandero','Duster','Spring','Jogger'],
+'Dodge':['Challenger','Charger','Durango','Ram','Journey','Caliber'],
+'FAW':['Bestune T77','Bestune T99','Bestune B70'],
+'FIAT':['500','500X','500L','Punto','Tipo','Doblo','Ducato','Bravo','Panda'],
+'Ford':['EcoSport','Edge','Escape','Explorer','F-150','Fiesta','Focus','Focus RS','Focus ST','Fusion','Galaxy','Ka','Kuga','Mondeo','Mustang','Mustang Mach-E','Puma','Ranger','S-Max','Transit','Transit Connect'],
+'GAC':['GS3','GS4','GS5','GS8','GA4','GA6','Aion V','Aion S'],
+'Geely':['Atlas','Atlas Pro','Coolray','Tugella','Emgrand','Monjaro','Okavango','Preface','Vision X6','Star Era L','Galaxy L7'],
+'Genesis':['G70','G80','G90','GV70','GV80','GV60'],
+'Haval':['F7','F7x','H2','H6','H6 Plus','H9','Jolion','Dargo','Dargo X'],
+'Honda':['Accord','City','Civic','Civic Type R','CR-V','CR-Z','e','Element','Fit','HR-V','Insight','Jazz','Legend','Odyssey','Passport','Pilot','Ridgeline','e:Ny1','ZR-V'],
+'Hummer':['H1','H2','H3'],
+'Hyundai':['Accent','Bayon','Creta','Creta N Line','Elantra','Elantra N','Getz','Grandeur','i10','i20','i20 N','i30','i30 N','i40','Ioniq','Ioniq 5','Ioniq 6','Kona','Kona Electric','Matrix','Nexo','Palisade','Santa Fe','Solaris','Solaris Cross','Sonata','Staria','Tucson','Venue','Veloster','H-1','Porter II'],
+'Infiniti':['Q30','Q50','Q60','Q70','QX30','QX50','QX55','QX60','QX70','QX80','EX','FX','G','M'],
+'JAC':['JS4','JS6','JS8','J7','S3','S7','Sehol E40X','Sehol X4'],
+'Jaguar':['E-Pace','E-Type','F-Pace','F-Type','I-Pace','S-Type','X-Type','XE','XF','XJ'],
+'Jeep':['Cherokee','Compass','Grand Cherokee','Grand Wagoneer','Renegade','Wrangler','Gladiator'],
+'Kia':['Carnival','Cerato','Ceed','EV6','Mohave','Niro','Optima','K5','K8','Picanto','ProCeed','Rio','Rio X','Rio X-Line','Seltos','Seltos X-Line','Sorento','Soul','Sportage','Stinger','Telluride','Xceed','Xceed Cross'],
+'Lamborghini':['Huracan','Urus','Revuelto'],
+'Lada (ВАЗ)':['2101','2102','2103','2104','2105','2106','2107','2108','2109','21099','2110','2111','2112','2113','2114','2115','Granta','Granta Cross','Granta Drive','Vesta','Vesta Cross','Vesta SW','Vesta SW Cross','XRAY','XRAY Cross','Largus','Largus Cross','Niva Legend','Niva Travel','Niva Sport','Kalina','Kalina Cross','Priora'],
+'Land Rover':['Defender','Discovery','Discovery Sport','Freelander','Range Rover','Range Rover Evoque','Range Rover Sport','Range Rover Velar'],
+'Lexus':['CT','ES','GS','GX','IS','LS','LX','NX','RC','RX','UX','LC','LM'],
+'Lincoln':['Aviator','Corsair','MKC','MKX','MKZ','Navigator'],
+'Maserati':['Ghibli','GranTurismo','Grecale','Levante','MC20','Quattroporte'],
+'Mazda':['CX-3','CX-30','CX-5','CX-50','CX-60','CX-8','CX-9','Mazda2','Mazda3','Mazda6','MX-5','MX-30','RX-7','RX-8','323','626','MPV'],
+'Mercedes-Benz':['A 180','A 200','A 220','A 250','A 35 AMG','A 45 AMG','B 180','B 200','B 220','C 180','C 200','C 220','C 250','C 300','C 350','C 43 AMG','C 63 AMG','CLA 180','CLA 200','CLA 250','CLA 35 AMG','CLA 45 AMG','CLS 300','CLS 350','CLS 450','CLS 53 AMG','E 200','E 220','E 250','E 300','E 350','E 400','E 43 AMG','E 53 AMG','E 63 AMG','G 350','G 400','G 500','G 63 AMG','GLA 200','GLA 220','GLA 250','GLA 35 AMG','GLA 45 AMG','GLB 200','GLB 220','GLB 250','GLC 200','GLC 220','GLC 250','GLC 300','GLC 350','GLC 43 AMG','GLC 63 AMG','GLE 300','GLE 350','GLE 400','GLE 450','GLE 53 AMG','GLE 63 AMG','GLS 350','GLS 400','GLS 450','GLS 580','S 350','S 400','S 450','S 500','S 560','S 580','S 63 AMG','S 65 AMG','AMG GT','AMG GT 4','EQA','EQB','EQC','EQE','EQS','SL','SLK','SLC','Sprinter','Vito','V-Class'],
+'MINI':['Cooper','Cooper S','Cooper SE','Clubman','Countryman','Countryman S','Paceman','Roadster','Cabrio'],
+'Mitsubishi':['ASX','Colt','Eclipse Cross','Galant','Grandis','Lancer','Lancer Evolution','L200','L400','Outlander','Outlander PHEV','Outlander Sport','Pajero','Pajero Mini','Pajero Sport','i-MiEV','Carisma','Space Star'],
+'Nissan':['370Z','400Z','Almera','Ariya','Frontier','GT-R','Juke','Juke NISMO','Kicks','Leaf','Magnite','Maxima','Micra','Murano','Navara','Note','Pathfinder','Patrol','Qashqai','Sentra','Terra','Teana','Terrano','Tiida','Titan','X-Trail','X-Terra'],
+'Opel':['Adam','Astra','Astra OPC','Cascada','Corsa','Crossland','Frontera','Grandland','Insignia','Insignia GSi','Meriva','Mokka','Mokka-e','Omega','Signum','Vectra','Vivaro','Zafira'],
+'Peugeot':['107','108','2008','208','208 GTi','3008','301','308','308 GTi','408','508','508 SW','5008','Rifter','Partner','Expert'],
+'Porsche':['718 Boxster','718 Cayman','911','Cayenne','Cayenne Coupe','Macan','Panamera','Taycan'],
+'RAM':['1500','2500','3500','ProMaster'],
+'Renault':['Arkana','Austral','Captur','Clio','Clio RS','Duster','Fluence','Grand Scenic','Kadjar','Kangoo','Koleos','Laguna','Logan','Logan MCV','Master','Megane','Megane RS','Sandero','Sandero Stepway','Scenic','Talisman','Traffic','Zoe'],
+'Rolls-Royce':['Cullinan','Dawn','Ghost','Phantom','Spectre','Wraith'],
+'SEAT':['Arona','Ateca','Ibiza','Leon','Leon ST','Tarraco'],
+'Skoda':['Enyaq','Fabia','Kamiq','Karoq','Kodiaq','Octavia','Octavia RS','Rapid','Scala','Slavia','Superb'],
+'smart':['EQ fortwo','EQ forfour','#1','#3'],
+'SsangYong':['Actyon','Korando','Kyron','Musso','Rexton','Tivoli','XLV'],
+'Subaru':['Ascent','BRZ','Crosstrek','Forester','Impreza','Legacy','Levorg','Outback','Solterra','WRX','WRX STI','XV'],
+'Suzuki':['Across','Baleno','Celerio','Ertiga','Grand Vitara','Ignis','Jimny','Kizashi','S-Cross','SX4','Swift','Swift Sport','Vitara','XL7'],
+'Tesla':['Model 3','Model S','Model X','Model Y','Cybertruck'],
+'Toyota':['4Runner','86','Alphard','Aurion','Avalon','Avensis','Aygo','C-HR','Camry','Corolla','Corolla Cross','Corolla Verso','Crown','FJ Cruiser','Fortuner','GR86','GR Yaris','Hilux','Highlander','Land Cruiser 70','Land Cruiser 80','Land Cruiser 100','Land Cruiser 105','Land Cruiser 200','Land Cruiser 300','Land Cruiser Prado','Prius','Prius Plus','RAV4','RAV4 Prime','Rush','Sequoia','Sienna','Supra','Tundra','Urban Cruiser','Venza','Verso','Yaris','Yaris Cross','bZ4X'],
+'UAZ (УАЗ)':['2206','3303','3909','39625','Hunter','Patriot','Patriot Sport','Pickup','Буханка'],
+'Volkswagen':['Amarok','Arteon','Atlas','Caddy','California','Caravelle','CC','Crafter','Golf','Golf GTI','Golf GTE','Golf R','ID.3','ID.4','ID.5','ID.6','Jetta','Multivan','Passat','Passat CC','Phaeton','Polo','Sharan','T-Cross','T-Roc','Taigo','Taos','Tiguan','Tiguan Allspace','Touareg','Touran','Transporter','Up'],
+'Volvo':['C30','C40','C70','S40','S60','S80','S90','V40','V50','V60','V70','V90','XC40','XC60','XC70','XC90'],
+// Китайские марки
+'BYD':['Atto 3','Han','Song','Seal','Tang','Dolphin','Seagull','Yuan Plus'],
+'Changan':['CS35','CS35 Plus','CS55','CS55 Plus','CS75','CS75 Plus','CS85','Uni-K','Uni-T','Uni-V'],
+'EXEED':['LX','TXL','VX'],
+'Hongqi':['H5','H9','E-HS9','HS5'],
+'Huawei AITO':['M5','M7'],
+'JAECOO':['J7','J8'],
+'Jetour':['Dashing','X70','X70 Plus','X90'],
+'Lixiang (Li Auto)':['L6','L7','L8','L9','Mega'],
+'OMODA':['C5','S5'],
+'Tank':['300','400','500'],
+'Voyah':['Free','Dream'],
+'XCMG':['Hanma H3','Hanma H9'],
+'Xpeng':['G6','G9','P7','P5'],
+// Корейские
+'Genesis':['G70','G80','G90','GV70','GV80','GV60'],
+// Прочие
 'Другое':['Другая модель']
 };
+
 
 const DEFAULT_REVIEWS=[
   // Fit Service (12)
@@ -904,8 +1025,7 @@ function updateNav(){
   const u=currentUser;
   document.getElementById('navAuth').style.display=u?'none':'';
   document.getElementById('navUser').style.display=u?'':'none';
-  if(u)document.getElementById('uInit').textContent=(u.name||u.email||'?')[0].toUpperCase();
-  document.getElementById('statUsers').textContent=(DB.get('users')||[]).length;
+  if(u)document.getElementById('uInit').textContent=(u.name||u.email||u.phone||'?')[0].toUpperCase();
   updateRating();
 }
 function updateRating(){
@@ -920,34 +1040,130 @@ function switchAuthTab(t){
   document.getElementById('loginForm').style.display=t==='login'?'':'none';
   document.getElementById('registerForm').style.display=t==='register'?'':'none';
 }
-function doLogin(){
-  const email=document.getElementById('loginEmail').value.trim();
+async function doLogin(){
+  const login=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPass').value;
   const err=document.getElementById('loginError');
-  const user=(DB.get('users')||[]).find(u=>u.email===email&&u.pass===pass);
-  if(!user){err.style.display='block';err.textContent='Неверный email или пароль';return;}
+  const btn=document.getElementById('loginBtn');
   err.style.display='none';
-  currentUser=user;DB.set('currentUser',user);
-  closeModal('authModal');updateNav();showToast('Добро пожаловать, '+user.name+'! 👋',true);
+  if(!login||!pass){err.style.display='block';err.textContent='Заполните все поля';return;}
+  btn.textContent='Входим...'; btn.disabled=true;
+  const isEmail = login.includes('@');
+  const body = isEmail ? {email:login, password:pass} : {phone:login, password:pass};
+  const res = await apiCall(API+'/login/', 'POST', body);
+  btn.textContent='Войти'; btn.disabled=false;
+  if(!res.ok){
+    err.style.display='block';
+    err.textContent=res.data.detail||'Неверный email/телефон или пароль';
+    return;
+  }
+  const {user, tokens} = res.data;
+  DB.set('access_token', tokens.access);
+  DB.set('refresh_token', tokens.refresh);
+  const u = {id:user.id, name:(user.first_name||'')+' '+(user.last_name||''), email:user.email, phone:user.phone, created:user.date_joined||new Date().toISOString()};
+  u.name = u.name.trim() || user.email || user.phone;
+  currentUser=u; DB.set('currentUser',u);
+  closeModal('authModal'); updateNav();
+  showToast('Добро пожаловать, '+u.name+'! 👋',true);
 }
-function doRegister(){
+async function doRegister(){
   const name=document.getElementById('regName').value.trim();
   const email=document.getElementById('regEmail').value.trim();
   const phone=document.getElementById('regPhone').value.trim();
   const pass=document.getElementById('regPass').value;
   const err=document.getElementById('regError'),suc=document.getElementById('regSuccess');
+  const btn=document.getElementById('registerBtn');
   err.style.display='none';suc.style.display='none';
-  if(!name||!email||!pass){err.style.display='block';err.textContent='Заполните все поля';return;}
+  if(!name||!pass){err.style.display='block';err.textContent='Заполните имя и пароль';return;}
+  if(!email&&!phone){err.style.display='block';err.textContent='Укажите email или телефон';return;}
   if(pass.length<6){err.style.display='block';err.textContent='Пароль минимум 6 символов';return;}
-  const users=DB.get('users')||[];
-  if(users.find(u=>u.email===email)){err.style.display='block';err.textContent='Email уже зарегистрирован';return;}
-  const user={id:Date.now(),name,email,phone,pass,city:'Абакан',created:new Date().toISOString()};
-  DB.push('users',user);currentUser=user;DB.set('currentUser',user);
-  suc.style.display='block';suc.textContent='Аккаунт создан!';
-  setTimeout(()=>{closeModal('authModal');updateNav();showToast('Добро пожаловать, '+name+'! 🎉',true);},700);
+  btn.textContent='Создаём...'; btn.disabled=true;
+  const nameParts=name.split(' ');
+  const body={password:pass, first_name:nameParts[0]||'', last_name:nameParts.slice(1).join(' ')||''};
+  if(phone) body.phone=phone;
+  if(email) body.email=email;
+  const res = await apiCall(API+'/register/', 'POST', body);
+  btn.textContent='Создать аккаунт'; btn.disabled=false;
+  if(!res.ok){
+    err.style.display='block';
+    const errs=res.data;
+    err.textContent=errs.detail||errs.phone?.[0]||errs.email?.[0]||errs.password?.[0]||'Ошибка регистрации';
+    return;
+  }
+  const {user, tokens} = res.data;
+  DB.set('access_token', tokens.access);
+  DB.set('refresh_token', tokens.refresh);
+  const u = {id:user.id, name:name, email:user.email, phone:user.phone, created:user.date_joined||new Date().toISOString()};
+  currentUser=u; DB.set('currentUser',u);
+  suc.style.display='block'; suc.textContent='Аккаунт создан! 🎉';
+  setTimeout(()=>{closeModal('authModal');updateNav();showToast('Добро пожаловать, '+name+'! 🎉',true);},800);
 }
-function doLogout(){currentUser=null;DB.set('currentUser',null);updateNav();showPage('home');showToast('Вы вышли из аккаунта',false);}
+function doLogout(){
+  currentUser=null;
+  DB.set('currentUser',null);
+  DB.set('access_token',null);
+  DB.set('refresh_token',null);
+  updateNav();showPage('home');showToast('Вы вышли из аккаунта',false);
+}
 function requireAuth(cb){if(!currentUser){openModal('authModal');return;}cb();}
+let forgotPhone='', forgotResetToken='';
+
+async function doForgotSend(){
+  const email=document.getElementById('forgotEmail').value.trim();
+  const err=document.getElementById('forgotError');
+  const btn=document.getElementById('forgotSendBtn');
+  err.style.display='none';
+  if(!email){err.style.display='block';err.textContent='Введите email';return;}
+  btn.textContent='Отправляем...';btn.disabled=true;
+  const res=await apiCall(API+'/recovery/send-email-code/','POST',{email});
+  btn.textContent='Отправить код на email';btn.disabled=false;
+  if(!res.ok){err.style.display='block';err.textContent=res.data.detail||'Email не найден';return;}
+  forgotPhone=res.data.phone||'';
+  // Show step 2
+  document.getElementById('forgotStep1').style.display='none';
+  document.getElementById('forgotStep2').style.display='';
+  document.getElementById('forgotTitle').textContent='Введите код';
+  document.getElementById('forgotSub').textContent='Код отправлен на '+email;
+}
+
+async function doForgotVerify(){
+  const code=document.getElementById('forgotCode').value.trim();
+  const err=document.getElementById('forgotCodeError');
+  err.style.display='none';
+  if(!code||code.length<4){err.style.display='block';err.textContent='Введите 4-значный код';return;}
+  const res=await apiCall(API+'/verify-code/','POST',{phone:forgotPhone,code,purpose:'reset'});
+  if(!res.ok){err.style.display='block';err.textContent=res.data.detail||'Неверный код';return;}
+  forgotResetToken=res.data.reset_token||'';
+  document.getElementById('forgotStep2').style.display='none';
+  document.getElementById('forgotStep3').style.display='';
+  document.getElementById('forgotTitle').textContent='Новый пароль';
+  document.getElementById('forgotSub').textContent='Придумайте новый пароль';
+}
+
+async function doForgotReset(){
+  const p1=document.getElementById('forgotNewPass').value;
+  const p2=document.getElementById('forgotNewPass2').value;
+  const err=document.getElementById('forgotPassError');
+  err.style.display='none';
+  if(p1.length<6){err.style.display='block';err.textContent='Минимум 6 символов';return;}
+  if(p1!==p2){err.style.display='block';err.textContent='Пароли не совпадают';return;}
+  const res=await apiCall(API+'/reset-password/','POST',{reset_token:forgotResetToken,new_password:p1});
+  if(!res.ok){err.style.display='block';err.textContent=res.data.detail||'Ошибка';return;}
+  closeModal('forgotModal');
+  openModal('authModal');
+  showToast('Пароль изменён! Войдите с новым паролем.',true);
+  // Reset forgot modal
+  document.getElementById('forgotStep1').style.display='';
+  document.getElementById('forgotStep2').style.display='none';
+  document.getElementById('forgotStep3').style.display='none';
+  document.getElementById('forgotTitle').textContent='Восстановление доступа';
+  document.getElementById('forgotSub').textContent='Введите email, указанный при регистрации';
+  document.getElementById('forgotEmail').value='';
+  document.getElementById('forgotCode').value='';
+  document.getElementById('forgotNewPass').value='';
+  document.getElementById('forgotNewPass2').value='';
+}
+
 function toggleDrop(){document.getElementById('uav').classList.toggle('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('#uav'))document.getElementById('uav').classList.remove('open');});
 
@@ -968,7 +1184,7 @@ function filterOrgs(){
     const bc=o.type==='evac'?'be':o.type==='parts'?'bp':'bs';
     const bl=o.type==='evac'?'🚛 Эвакуатор':o.type==='parts'?'🛒 Запчасти':'🔧 Автосервис';
     const iL=cView==='list';
-    return `<div class="org-card ${iL?'org-card-list':''}"><div class="org-ic" style="${iL?'':'margin-bottom:11px'}">${ic}</div>${iL?'<div class="org-body">':''}<div class="org-name">${o.name}</div><div class="org-tbadge ${bc}">${bl}</div><div>${rs}</div><div class="org-meta"><span>🕐 ${o.hours}</span><span>📍 ${o.dist}</span></div><div style="font-size:11px;color:var(--gray);margin-top:5px">📌 ${o.addr||''}</div><div class="org-btns"><button class="org-btn obc" onclick="showToast('Звонок: ${o.phone}',true)">📞 Позвонить</button><button class="org-btn obr" onclick="showToast('Маршрут построен до ${o.name}',true)">🗺️ Маршрут</button></div>${iL?'</div>':''}</div>`;
+    return `<div class="org-card ${iL?'org-card-list':''}"><div class="org-ic" style="${iL?'':'margin-bottom:11px'}">${ic}</div>${iL?'<div class="org-body">':''}<div class="org-name">${o.name}</div><div class="org-tbadge ${bc}">${bl}</div><div>${rs}</div><div class="org-meta"><span>🕐 ${o.hours}</span><span>📍 ${o.dist}</span></div><div style="font-size:11px;color:var(--gray);margin-top:5px">📌 ${o.addr||''}</div><div class="org-btns"><a class="org-btn obc" href="tel:${o.phone}" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px">📞 Позвонить</a><button class="org-btn obr" onclick="openMaps('${o.name}','${o.addr||o.name}')">🗺️ Маршрут</button></div>${iL?'</div>':''}</div>`;
   }).join('');
 }
 
@@ -982,7 +1198,15 @@ function fillYears(){
   const ys=document.getElementById('carYear');ys.innerHTML='';
   for(let y=2026;y>=1990;y--){const o=document.createElement('option');o.value=y;o.textContent=y;ys.appendChild(o);}
 }
+function populateMakes(){
+  const sel = document.getElementById('carMake');
+  if(sel.options.length > 1) return; // already populated
+  Object.keys(CAR_MODELS).sort().forEach(m=>{
+    const o = document.createElement('option'); o.value=m; o.textContent=m; sel.appendChild(o);
+  });
+}
 function openAddCar(){
+  populateMakes();
   document.getElementById('carModalTitle').textContent='Добавить автомобиль';
   document.getElementById('editCarIdx').value='-1';
   document.getElementById('carMake').value='';
@@ -996,6 +1220,7 @@ function openAddCar(){
 function openEditCar(idx){
   const cars=DB.get('cars_'+currentUser.id)||[];
   const c=cars[idx];if(!c)return;
+  populateMakes();
   document.getElementById('carModalTitle').textContent='Редактировать автомобиль';
   document.getElementById('editCarIdx').value=idx;
   document.getElementById('carMake').value=c.make||'';
@@ -1035,6 +1260,20 @@ function renderGarage(){
   if(!cars.length){emp.style.display='';grid.innerHTML='';document.getElementById('garageHint').textContent='';return;}
   emp.style.display='none';document.getElementById('garageHint').textContent='Автомобилей: '+cars.length;
   grid.innerHTML=cars.map((c,i)=>`<div class="car-card"><span class="car-emoji">${EMOJIS[i%EMOJIS.length]}</span><div class="car-name">${c.make} ${c.model}</div><div class="car-info">${c.year} · ${parseInt(c.mileage||0).toLocaleString()} км · ${c.engine}</div><div class="to-list">${TO_ITEMS.map(t=>{const s=getToSt(c.mileage,t.km);return`<div class="to-row"><span class="to-name">${t.name}</span><div style="text-align:right"><div class="to-badge ${s.cls}">${s.label}</div><div style="font-size:11px;color:var(--gray);margin-top:1px">${s.km}</div></div></div>`;}).join('')}</div><div class="car-actions"><button class="car-btn cbe" onclick="openEditCar(${i})">✏️ Редактировать</button><button class="car-btn cbd" onclick="deleteCar(${i})">🗑️ Удалить</button></div></div>`).join('');
+}
+
+function openMaps(name, addr){
+  const q = encodeURIComponent(addr + ' Абакан');
+  window.open('https://maps.google.com/?q=' + q, '_blank');
+}
+
+// Review search
+function filterReviews(){
+  const q = (document.getElementById('reviewSearch')?.value||'').toLowerCase();
+  document.querySelectorAll('.org-review-group').forEach(g=>{
+    const title = g.querySelector('.org-review-title')?.textContent?.toLowerCase()||'';
+    g.style.display = (!q || title.includes(q)) ? '' : 'none';
+  });
 }
 
 let editRevIdx=-1;
@@ -1099,13 +1338,22 @@ function renderFaq(){document.getElementById('faqList').innerHTML=FAQS.map((f,i)
 function toggleFaq(i){document.querySelectorAll('.faq-item').forEach((el,j)=>{if(j!==i)el.classList.remove('open');});document.getElementById('faq'+i).classList.toggle('open');}
 
 function getDocSt(exp){const d=(new Date(exp)-new Date())/(1000*60*60*24);if(d<0)return{cls:'due',label:'Просрочено'};if(d<90)return{cls:'warn',label:'Скоро истекает'};return{cls:'ok',label:'Актуально'};}
-function renderProfile(){
+async function renderProfile(){
   if(!currentUser){showPage('home');openModal('authModal');return;}
-  document.getElementById('pAvatar').textContent=(currentUser.name||currentUser.email)[0].toUpperCase();
-  document.getElementById('pName').textContent=currentUser.name||'—';
+  // Try to refresh profile from server
+  const res = await apiCall(API+'/profile/','GET',null,true);
+  if(res.ok){
+    const u=res.data;
+    const name=((u.first_name||'')+' '+(u.last_name||'')).trim()||u.email||u.phone||'—';
+    currentUser={...currentUser, name, email:u.email, phone:u.phone};
+    DB.set('currentUser',currentUser);
+  }
+  const displayName=currentUser.name||currentUser.email||currentUser.phone||'—';
+  document.getElementById('pAvatar').textContent=displayName[0].toUpperCase();
+  document.getElementById('pName').textContent=displayName;
   document.getElementById('pEmail').textContent=currentUser.email||'—';
   const cars=DB.get('cars_'+currentUser.id)||[];
-  const myRevs=(DB.get('reviews')||[]).filter(r=>r.user===(currentUser.name||currentUser.email));
+  const myRevs=(DB.get('reviews')||[]).filter(r=>r.user===displayName||r.user===(currentUser.email||''));
   document.getElementById('pCars').textContent=cars.length;
   document.getElementById('pRevs').textContent=myRevs.length;
   document.getElementById('pDays').textContent=Math.max(1,Math.floor((Date.now()-new Date(currentUser.created||Date.now()))/(86400000)));
@@ -1140,16 +1388,29 @@ function openEditProfile(){
   document.getElementById('epPass').value='';
   openModal('editProfileModal');
 }
-function saveProfile(){
+async function saveProfile(){
   const name=document.getElementById('epName').value.trim();
   const phone=document.getElementById('epPhone').value.trim();
   const city=document.getElementById('epCity').value.trim();
   const pass=document.getElementById('epPass').value;
   if(!name){showToast('Введите имя',false);return;}
-  const users=DB.get('users')||[];
-  const idx=users.findIndex(u=>u.id===currentUser.id);
-  if(idx>=0){users[idx]={...users[idx],name,phone,city};if(pass.length>=6)users[idx].pass=pass;DB.set('users',users);currentUser={...users[idx]};DB.set('currentUser',currentUser);}
-  closeModal('editProfileModal');updateNav();renderProfile();showToast('Профиль обновлён ✓',true);
+  const nameParts=name.split(' ');
+  const body={first_name:nameParts[0]||'',last_name:nameParts.slice(1).join(' ')||''};
+  if(phone) body.phone=phone;
+  // Update profile
+  const res = await apiCall(API+'/profile/', 'PATCH', body, true);
+  if(res.ok){
+    const u=res.data;
+    currentUser={...currentUser,name,phone,city,email:u.email};
+    DB.set('currentUser',currentUser);
+    // Change password if provided
+    if(pass.length>=6){
+      await apiCall(API+'/change-password/','POST',{old_password:'',new_password:pass},true);
+    }
+    closeModal('editProfileModal');updateNav();renderProfile();showToast('Профиль обновлён ✓',true);
+  } else {
+    showToast(res.data.detail||'Ошибка обновления',false);
+  }
 }
 
 function saveSetting(k,v){const s=DB.get('settings')||{};s[k]=v;DB.set('settings',s);showToast('Сохранено',true);}
@@ -1174,7 +1435,11 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 
 let tT;
 function showToast(msg,green){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(green?' green':' redbg');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),3000);}
-function downloadAPK(){showToast('Ссылка на APK будет добавлена позже',false);}
+function downloadAPK(){
+  const apkUrl = DB.get('apkUrl') || '';
+  if(apkUrl){ window.open(apkUrl,'_blank'); }
+  else { showToast('Ссылка на APK будет добавлена позже',false); }
+}
 
 const revEls=document.querySelectorAll('.reveal');
 const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('v');obs.unobserve(e.target);}}),{threshold:.1});
@@ -1182,6 +1447,22 @@ revEls.forEach(r=>obs.observe(r));
 
 if(DB.get('theme')==='dark')document.documentElement.dataset.theme='dark';
 currentUser=DB.get('currentUser');
+// Validate token on page load
+if(currentUser && getToken()){
+  apiCall(API+'/profile/','GET',null,true).then(r=>{
+    if(r.ok){
+      const u=r.data;
+      const name=((u.first_name||'')+' '+(u.last_name||'')).trim()||u.email||u.phone||'';
+      currentUser={...currentUser,name,email:u.email,phone:u.phone,id:u.id};
+      DB.set('currentUser',currentUser);
+      updateNav();
+    } else if(r.status===401){
+      // Token expired and refresh failed - logout
+      currentUser=null; DB.set('currentUser',null); DB.set('access_token',null); DB.set('refresh_token',null);
+      updateNav();
+    }
+  });
+}
 updateNav();
 </script>
 </body>
