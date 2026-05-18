@@ -342,7 +342,10 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
   <div class="modal">
     <button class="modal-close" onclick="closeModal('editProfileModal')">✕</button>
     <h2>Редактировать профиль</h2><div class="modal-sub">Обновите ваши данные</div>
-    <div class="fg"><label>Имя</label><input type="text" id="epName"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>Имя</label><input type="text" id="epName" placeholder="Иван"></div>
+      <div class="fg"><label>Фамилия</label><input type="text" id="epLastName" placeholder="Иванов"></div>
+    </div>
     <div class="fg"><label>Телефон</label><input type="tel" id="epPhone"></div>
     <div style="border-top:1px solid var(--beige-mid);margin:14px 0;padding-top:14px">
       <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Смена пароля (необязательно)</div>
@@ -647,9 +650,53 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
 <script>
 const DB={get(k){try{return JSON.parse(localStorage.getItem('ah_'+k))}catch{return null}},set(k,v){localStorage.setItem('ah_'+k,JSON.stringify(v))},push(k,i){const a=DB.get(k)||[];a.push(i);DB.set(k,a);return a}};
 
+async function loadAppRatings(){
+  try {
+    const res = await fetch(APP_RATING_API);
+    if(res.ok){
+      const data = await res.json();
+      DB.set('appRatingsServer', data);
+      const el=document.getElementById('statRating');
+      if(el && data.avg) el.textContent=data.avg+'\u2605';
+    }
+  } catch(e){}
+  refreshAppRatingModal();
+}
+
+function refreshAppRatingModal(){
+  const serverData = DB.get('appRatingsServer');
+  const localRatings = DB.get('appRatings')||[];
+  const items = (serverData && serverData.items && serverData.items.length)
+    ? serverData.items : localRatings;
+  const avg = serverData && serverData.avg ? serverData.avg
+    : (localRatings.length ? (localRatings.reduce((s,r)=>s+r.stars,0)/localRatings.length).toFixed(1) : null);
+  const count = serverData ? serverData.count : localRatings.length;
+  const dispEl=document.getElementById('appRatingDisplay');
+  const cntEl=document.getElementById('appRatingCount');
+  if(dispEl) dispEl.textContent = avg ? avg+'★' : '—';
+  if(cntEl) cntEl.textContent = (count||0)+' '+((count||0)===1?'оценка':(count||0)<5&&(count||0)>1?'оценки':'оценок');
+  const rList=document.getElementById('appRatingsList');
+  if(!rList) return;
+  if(!items||!items.length){
+    rList.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:10px">Отзывов пока нет</div>';
+    return;
+  }
+  rList.innerHTML=items.map(r=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--beige-mid);text-align:left">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;flex-shrink:0">${(r.user||'?')[0].toUpperCase()}</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:700">${r.user||'Пользователь'}</div><div style="font-size:11px;color:var(--gray)">${r.date||''}</div></div>
+        <div style="color:#F59E0B;font-size:15px">${'★'.repeat(r.stars)}</div>
+      </div>
+      \${r.comment?\`<div style="font-size:13px;color:var(--gray);line-height:1.5;padding-left:40px">\${r.comment}</div>\`:''}
+    </div>`).join('');
+}
+
+
 // ══ API CONFIG ══
 const API = 'https://auto-helper-backend-production.up.railway.app/api/auth';
 const ORGS_API = 'https://auto-helper-backend-production.up.railway.app/api/organizations';
+const APP_RATING_API = ORGS_API + '/app-rating/';
 
 function getToken(){ return DB.get('access_token')||''; }
 function getRefresh(){ return DB.get('refresh_token')||''; }
@@ -1260,7 +1307,7 @@ function showPage(n){
   window.scrollTo(0,0);
   if(n==='catalog'){filterOrgs();}
   if(n==='garage')renderGarage();
-  if(n==='reviews'){loadServerReviews();}
+  if(n==='reviews'){loadServerReviews(); loadAppRatings();}
   if(n==='faq')renderFaq();
   if(n==='profile')renderProfile();
   if(n==='settings')syncSettings();
@@ -1270,7 +1317,7 @@ function updateNav(){
   const u=currentUser;
   document.getElementById('navAuth').style.display=u?'none':'';
   document.getElementById('navUser').style.display=u?'':'none';
-  if(u)document.getElementById('uInit').textContent=(u.name||u.email||u.phone||'?')[0].toUpperCase();
+  if(u){const initStr=(u.firstName||u.name||u.email||u.phone||'?');document.getElementById('uInit').textContent=initStr[0].toUpperCase();}
   updateRating();
 }
 function updateRating(){
@@ -1311,11 +1358,20 @@ async function doLogin(){
   const {user, tokens} = res.data;
   DB.set('access_token', tokens.access);
   DB.set('refresh_token', tokens.refresh);
-  const u = {id:user.id, name:(user.first_name||'')+' '+(user.last_name||''), email:user.email, phone:user.phone, created:user.date_joined||new Date().toISOString()};
-  u.name = u.name.trim() || user.email || user.phone;
+  const firstName = user.first_name||'';
+  const lastName = user.last_name||'';
+  const fullName = (firstName+' '+lastName).trim() || user.name || user.email || user.phone || '';
+  const u = {
+    id: user.id,
+    name: fullName,
+    firstName, lastName,
+    email: user.email||'',
+    phone: user.phone||'',
+    created: user.date_joined||user.created_at||new Date().toISOString()
+  };
   currentUser=u; DB.set('currentUser',u);
   closeModal('authModal'); updateNav();
-  showToast('Добро пожаловать, '+u.name+'! 👋',true);
+  showToast('Добро пожаловать, '+(firstName||fullName||'')+'! 👋',true);
 }
 async function doRegister(){
   const name=document.getElementById('regName').value.trim();
@@ -1656,15 +1712,33 @@ function getAppRating(){
 }
 
 function updateAppRatingStat(){
-  const {avg, count} = getAppRating();
+  const serverData = DB.get('appRatingsServer');
+  const avg = serverData&&serverData.avg ? serverData.avg : getAppRating().avg;
   const el = document.getElementById('statRating');
-  if(el) el.textContent = avg==='—' ? '—' : avg+'★';
+  if(el) el.textContent = avg&&avg!=='—' ? avg+'★' : '—';
 }
+
+// Load current user's app rating from localStorage on login
+function loadMyAppRating(){
+  if(!currentUser) return;
+  const ratings = DB.get('appRatings')||[];
+  const myRating = ratings.find(r=>r.uid===currentUser.id||r.uid===String(currentUser.id));
+  if(myRating){
+    // Already have rating
+    return;
+  }
+}
+
 
 function openAppRating(){
   currentAppStar = 0;
-  const ratings = DB.get('appRatings')||[];
-  const myRating = currentUser ? ratings.find(r=>r.uid===currentUser.id) : null;
+  // Check user own rating from server or local
+  const serverData = DB.get('appRatingsServer');
+  const localRatings = DB.get('appRatings')||[];
+  const myRating = currentUser ? (
+    ((serverData&&serverData.items)||[]).find(r=>r.uid===currentUser.id||r.uid===String(currentUser.id)) ||
+    localRatings.find(r=>r.uid===currentUser.id)
+  ) : null;
   if(myRating){
     setAppStar(myRating.stars);
     document.getElementById('appRatingText').value = myRating.comment||'';
@@ -1673,31 +1747,11 @@ function openAppRating(){
     document.getElementById('appStarLabel').textContent='';
     document.getElementById('appRatingText').value='';
   }
-  const {avg, count} = getAppRating();
-  document.getElementById('appRatingDisplay').textContent = avg==='—'?'—':avg+'★';
-  document.getElementById('appRatingCount').textContent = count+' '+(count===1?'оценка':count<5?'оценки':'оценок');
-  // Render community ratings
-  const rList = document.getElementById('appRatingsList');
-  if(rList){
-    if(!ratings.length){
-      rList.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:10px">Отзывов пока нет</div>';
-    } else {
-      rList.innerHTML = ratings.slice(-10).reverse().map(r=>`
-        <div style="padding:10px 0;border-bottom:1px solid var(--beige-mid);text-align:left">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-            <div style="width:30px;height:30px;border-radius:50%;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;font-family:'Unbounded',sans-serif;flex-shrink:0">${(r.user||'?')[0].toUpperCase()}</div>
-            <div>
-              <div style="font-size:13px;font-weight:700">${r.user||'Пользователь'}</div>
-              <div style="font-size:11px;color:var(--gray)">${r.date||''}</div>
-            </div>
-            <div style="margin-left:auto;color:#F59E0B;font-size:14px">${'★'.repeat(r.stars)}</div>
-          </div>
-          ${r.comment?`<div style="font-size:13px;color:var(--gray);line-height:1.5;padding-left:38px">${r.comment}</div>`:''}
-        </div>`).join('');
-    }
-  }
+  refreshAppRatingModal();
+  loadAppRatings(); // load fresh from server
   openModal('appRatingModal');
 }
+
 
 function setAppStar(n){
   currentAppStar = n;
@@ -1707,23 +1761,28 @@ function setAppStar(n){
   document.getElementById('appStarLabel').textContent = APP_STAR_LABELS[n]||'';
 }
 
-function submitAppRating(){
+async function submitAppRating(){
   if(!currentAppStar){ showToast('Выберите оценку',false); return; }
   if(!currentUser){ closeModal('appRatingModal'); openModal('authModal'); showToast('Войдите чтобы оценить',false); return; }
-  const ratings = DB.get('appRatings')||[];
   const comment = document.getElementById('appRatingText').value.trim();
+
+  // Try server first
+  const res = await apiCall(APP_RATING_API, 'POST', {stars:currentAppStar, comment}, true);
+  if(res.ok){
+    showToast('Спасибо за оценку! '+('★'.repeat(currentAppStar)), true);
+    await loadAppRatings();
+    return;
+  }
+
+  // Fallback — local
+  const ratings = DB.get('appRatings')||[];
   const existIdx = ratings.findIndex(r=>r.uid===currentUser.id);
-  const newRating = {uid:currentUser.id, user:currentUser.name||currentUser.email, stars:currentAppStar, comment, date:new Date().toLocaleDateString('ru-RU')};
-  if(existIdx>=0) ratings[existIdx]=newRating;
-  else ratings.push(newRating);
+  const nr={uid:currentUser.id, user:currentUser.firstName||currentUser.name||'Пользователь', stars:currentAppStar, comment, date:new Date().toLocaleDateString('ru-RU')};
+  if(existIdx>=0) ratings[existIdx]=nr; else ratings.push(nr);
   DB.set('appRatings', ratings);
-  const {avg, count} = getAppRating();
-  document.getElementById('appRatingDisplay').textContent = avg+'★';
-  document.getElementById('appRatingCount').textContent = count+' '+(count===1?'оценка':count<5?'оценки':'оценок');
+  refreshAppRatingModal();
   updateAppRatingStat();
-  showToast('Спасибо за оценку! '+('★'.repeat(currentAppStar)), true);
-  // Refresh modal with new ratings
-  setTimeout(()=>openAppRating(), 500);
+  showToast('Оценка сохранена! '+('★'.repeat(currentAppStar)), true);
 }
 
 function togglePass(inputId, btnId){
@@ -1846,7 +1905,7 @@ async function submitReview(){
     }
     if(!res || !res.ok){
       res = await apiCall(ORGS_API+'/'+orgId+'/reviews/', 'POST',
-        {rating:cStar, text}, true);
+        {rating: cStar, text: text}, true);
     }
     if(res && res.ok){
       // Also save locally with server id for future edits
@@ -1860,6 +1919,7 @@ async function submitReview(){
       closeModal('reviewModal');
       // Reload reviews from server
       await loadServerReviews();
+      await loadAppRatings();
       showToast(editRevIdx>=0?'Отзыв обновлён ✓':'Отзыв опубликован! ⭐',true);
       editRevIdx=-1;
       return;
@@ -1883,36 +1943,37 @@ function deleteReview(idx){
 // Load reviews from server and merge with defaults
 async function loadServerReviews(){
   try {
-    // Load reviews for all orgs page by page
     const serverRevs = [];
-    for(const org of ORGS){
-      const res = await fetch(ORGS_API+'/'+org.id+'/reviews/?page_size=50');
-      if(res.ok){
-        const data = await res.json();
-        const results = data.results || data;
-        results.forEach(r=>{
-          // Try multiple possible field names from serializer
-          const userName = r.user_name || r.user_full_name || r.author_name ||
-            (r.user && typeof r.user === 'object' ? (r.user.first_name||'')+' '+(r.user.last_name||'') : '') ||
-            (r.user && typeof r.user === 'string' ? r.user : '') ||
-            'Пользователь';
-          serverRevs.push({
-            user: userName.trim() || 'Пользователь',
-            org: org.name,
-            stars: r.rating,
-            text: r.text || '',
-            date: r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU') : '',
-            serverId: r.id,
-            uid: r.user_id || (r.user && r.user.id) || r.user,
+    // Load all orgs in parallel for speed
+    const promises = ORGS.map(org =>
+      fetch(ORGS_API+'/'+org.id+'/reviews/?page_size=100')
+        .then(r=>r.ok?r.json():null)
+        .then(data=>{
+          if(!data) return;
+          const results = data.results || data || [];
+          results.forEach(r=>{
+            // author_name is the field from ReviewSerializer
+            const userName = r.author_name || r.user_name || r.user_full_name ||
+              (typeof r.user==='object'&&r.user?(r.user.first_name||'')+' '+(r.user.last_name||''):'') ||
+              (typeof r.user==='string'?r.user:'') || 'Пользователь';
+            serverRevs.push({
+              user: userName.trim()||'Пользователь',
+              org: org.name,
+              stars: r.rating,
+              text: r.text||'',
+              date: r.created_at?new Date(r.created_at).toLocaleDateString('ru-RU'):'',
+              serverId: r.id,
+              uid: r.user_id||(r.user&&r.user.id)||null,
+            });
           });
-        });
-      }
-    }
-    if(serverRevs.length > 0){
-      DB.set('serverReviews', serverRevs);
-    }
+        }).catch(()=>{})
+    );
+    await Promise.all(promises);
+    // Always update even if some failed
+    DB.set('serverReviews', serverRevs);
+    console.log('Loaded '+serverRevs.length+' reviews from server');
   } catch(e){
-    console.log('Could not load server reviews:', e);
+    console.log('loadServerReviews error:', e);
   }
   renderReviews();
   updateRating();
@@ -1994,14 +2055,24 @@ async function renderProfile(){
   const res = await apiCall(API+'/profile/','GET',null,true);
   if(res.ok){
     const u=res.data;
-    const name=((u.first_name||'')+' '+(u.last_name||'')).trim()||u.email||u.phone||'—';
-    currentUser={...currentUser, name, email:u.email, phone:u.phone};
+    const firstName = u.first_name||'';
+    const lastName = u.last_name||'';
+    const name = (firstName+' '+lastName).trim() || u.name || u.email || u.phone || '';
+    currentUser={...currentUser,
+      name, firstName, lastName,
+      email: u.email||currentUser.email||'',
+      phone: u.phone||currentUser.phone||'',
+      id: u.id||currentUser.id
+    };
     DB.set('currentUser',currentUser);
   }
-  const displayName=currentUser.name||currentUser.email||currentUser.phone||'—';
+  const displayName=currentUser.name||currentUser.firstName||currentUser.email||currentUser.phone||'—';
   document.getElementById('pAvatar').textContent=displayName[0].toUpperCase();
   document.getElementById('pName').textContent=displayName;
-  document.getElementById('pEmail').textContent=currentUser.email||'—';
+  document.getElementById('pEmail').textContent=currentUser.email||currentUser.phone||'—';
+  // Show phone separately if available
+  const pPhone=document.getElementById('pPhone');
+  if(pPhone) pPhone.textContent=currentUser.phone?('📞 '+currentUser.phone):'';
   const cars=DB.get('cars_'+currentUser.id)||[];
   const allUserRevs=DB.get('reviews')||[];
   const myRevs=allUserRevs.filter(r=>
@@ -2051,27 +2122,34 @@ function saveDoc(){
 }
 function openEditProfile(){
   if(!currentUser)return;
-  document.getElementById('epName').value=currentUser.name||'';
+  // Split name into first/last for edit form
+  const nameParts=(currentUser.name||'').split(' ');
+  document.getElementById('epName').value=currentUser.firstName||nameParts[0]||'';
+  document.getElementById('epLastName').value=currentUser.lastName||nameParts.slice(1).join(' ')||'';
   document.getElementById('epPhone').value=currentUser.phone||'';
   document.getElementById('epOldPass').value='';
   document.getElementById('epPass').value='';
   openModal('editProfileModal');
 }
 async function saveProfile(){
-  const name=document.getElementById('epName').value.trim();
+  const firstName=document.getElementById('epName').value.trim();
+  const lastName=document.getElementById('epLastName')?document.getElementById('epLastName').value.trim():'';
   const phone=document.getElementById('epPhone').value.trim();
-  const city=document.getElementById('epCity').value.trim();
   const pass=document.getElementById('epPass').value;
   const oldPass=document.getElementById('epOldPass').value;
-  if(!name){showToast('Введите имя',false);return;}
-  const nameParts=name.split(' ');
-  const body={first_name:nameParts[0]||'',last_name:nameParts.slice(1).join(' ')||''};
+  if(!firstName){showToast('Введите имя',false);return;}
+  const body={first_name:firstName, last_name:lastName};
   if(phone) body.phone=phone;
   // Update profile name/phone
   const res = await apiCall(API+'/profile/', 'PATCH', body, true);
   if(res.ok){
     const u=res.data;
-    currentUser={...currentUser,name,phone,city,email:u.email};
+    const newName=(firstName+' '+lastName).trim();
+    currentUser={...currentUser,
+      name:newName, firstName, lastName,
+      phone:phone||currentUser.phone,
+      email:u.email||currentUser.email
+    };
     DB.set('currentUser',currentUser);
     // Change password only if new password provided
     if(pass.length>=6){
@@ -2139,8 +2217,11 @@ if(currentUser && getToken()){
 }
 updateNav();
 updateAppRatingStat();
-// Load reviews from server on startup (non-blocking)
-loadServerReviews();
+// Load from server on startup (non-blocking)
+setTimeout(()=>{
+  loadServerReviews();
+  loadAppRatings();
+}, 100);
 </script>
 </body>
 </html>
