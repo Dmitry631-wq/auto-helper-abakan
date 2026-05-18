@@ -414,6 +414,7 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
     <div id="appStarLabel" style="font-size:14px;color:var(--gray);margin-bottom:16px;min-height:20px"></div>
     <div class="fg"><label>Комментарий (необязательно)</label><textarea id="appRatingText" rows="2" placeholder="Что понравилось или что улучшить?"></textarea></div>
     <button class="btn btn-dark" onclick="submitAppRating()">Отправить оценку</button>
+    <button id="deleteRatingBtn" style="display:none;margin-top:8px;width:100%;padding:11px;border-radius:50px;border:none;background:rgba(229,57,53,.1);color:var(--red);font-family:'Unbounded',sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="deleteAppRating()">🗑️ Удалить мою оценку</button>
     <div style="margin-top:16px;padding:12px;background:var(--beige-light);border-radius:12px">
       <div style="font-size:13px;color:var(--gray);margin-bottom:6px">Текущий рейтинг приложения</div>
       <div style="font-size:28px;font-weight:800;font-family:'Unbounded',sans-serif" id="appRatingDisplay">—</div>
@@ -1756,10 +1757,14 @@ function openAppRating(){
   if(myRating){
     setAppStar(myRating.stars);
     document.getElementById('appRatingText').value = myRating.comment||'';
+    const delBtn = document.getElementById('deleteRatingBtn');
+    if(delBtn) delBtn.style.display='block';
   } else {
     document.querySelectorAll('#appStarPick span').forEach(s=>{s.style.color='var(--beige-mid)';});
     document.getElementById('appStarLabel').textContent='';
     document.getElementById('appRatingText').value='';
+    const delBtn = document.getElementById('deleteRatingBtn');
+    if(delBtn) delBtn.style.display='none';
   }
   refreshAppRatingModal();
   loadAppRatings(); // load fresh from server
@@ -1773,6 +1778,22 @@ function setAppStar(n){
     s.style.color = i<n ? '#F59E0B' : 'var(--beige-mid)';
   });
   document.getElementById('appStarLabel').textContent = APP_STAR_LABELS[n]||'';
+}
+
+async function deleteAppRating(){
+  if(!currentUser){ openModal('authModal'); return; }
+  if(!confirm('Удалить вашу оценку?')) return;
+  const res = await apiCall(APP_RATING_API, 'DELETE', null, true);
+  if(res.ok){
+    showToast('Оценка удалена', true);
+    await loadAppRatings();
+    // Reset stars
+    setAppStar(0);
+    document.getElementById('appRatingText').value='';
+    document.getElementById('deleteRatingBtn').style.display='none';
+  } else {
+    showToast('Ошибка удаления', false);
+  }
 }
 
 async function submitAppRating(){
