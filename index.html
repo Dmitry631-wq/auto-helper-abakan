@@ -1389,21 +1389,28 @@ async function doLogin(){
   showToast('Добро пожаловать, '+(firstName||fullName||'')+'! 👋',true);
 }
 async function doRegister(){
-  const name=document.getElementById('regName').value.trim();
+  const firstName=document.getElementById('regName').value.trim();
+  const lastName=(document.getElementById('regLastName')||{value:''}).value.trim();
   const email=document.getElementById('regEmail').value.trim();
-  const phone=document.getElementById('regPhone').value.trim();
+  const phoneNum=document.getElementById('regPhone').value.trim();
+  const phoneCode=document.getElementById('regPhoneCode')?document.getElementById('regPhoneCode').value:'+7';
   const pass=document.getElementById('regPass').value;
+  const pass2=document.getElementById('regPass2')?document.getElementById('regPass2').value:pass;
   const err=document.getElementById('regError'),suc=document.getElementById('regSuccess');
   const btn=document.getElementById('registerBtn');
   err.style.display='none';suc.style.display='none';
-  if(!name||!pass){err.style.display='block';err.textContent='Заполните имя и пароль';return;}
-  if(!email&&!phone){err.style.display='block';err.textContent='Укажите email или телефон';return;}
+  if(!firstName){err.style.display='block';err.textContent='Введите имя';return;}
+  if(!email&&!phoneNum){err.style.display='block';err.textContent='Укажите email или телефон';return;}
   if(pass.length<6){err.style.display='block';err.textContent='Пароль минимум 6 символов';return;}
+  if(pass!==pass2){err.style.display='block';err.textContent='Пароли не совпадают';return;}
   btn.textContent='Создаём...'; btn.disabled=true;
-  const nameParts=name.split(' ');
-  const body={password:pass, first_name:nameParts[0]||'', last_name:nameParts.slice(1).join(' ')||''};
-  if(phone) body.phone=phone;
+  // Build phone
+  let fullPhone='';
+  if(phoneNum) fullPhone=phoneCode+phoneNum.replace(/\D/g,'');
+  const body={password:pass, first_name:firstName, last_name:lastName};
+  if(fullPhone) body.phone=fullPhone;
   if(email) body.email=email;
+  if(!fullPhone && email) body.phone=email; // backend requires phone
   const res = await apiCall(API+'/register/', 'POST', body);
   btn.textContent='Создать аккаунт'; btn.disabled=false;
   if(!res.ok){
@@ -1415,10 +1422,13 @@ async function doRegister(){
   const {user, tokens} = res.data;
   DB.set('access_token', tokens.access);
   DB.set('refresh_token', tokens.refresh);
-  const u = {id:user.id, name:name, email:user.email, phone:user.phone, created:user.date_joined||new Date().toISOString()};
+  const fn = user.first_name||firstName||'';
+  const ln = user.last_name||lastName||'';
+  const fullName = (fn+' '+ln).trim() || user.email || user.phone || '';
+  const u = {id:user.id, name:fullName, firstName:fn, lastName:ln, email:user.email||'', phone:user.phone||'', created:user.date_joined||new Date().toISOString()};
   currentUser=u; DB.set('currentUser',u);
   suc.style.display='block'; suc.textContent='Аккаунт создан! 🎉';
-  setTimeout(()=>{closeModal('authModal');updateNav();showToast('Добро пожаловать, '+name+'! 🎉',true);},800);
+  setTimeout(()=>{closeModal('authModal');updateNav();showToast('Добро пожаловать, '+(fn||fullName)+'!',true);},800);
 }
 function doLogout(){
   currentUser=null;
