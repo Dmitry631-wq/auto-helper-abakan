@@ -687,17 +687,25 @@ function refreshAppRatingModal(){
     rList.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:10px">Отзывов пока нет</div>';
     return;
   }
-  rList.innerHTML=items.map(r=>`
-    <div style="padding:10px 0;border-bottom:1px solid var(--beige-mid);text-align:left">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-        <div style="width:32px;height:32px;border-radius:50%;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;flex-shrink:0">${(r.user||'?')[0].toUpperCase()}</div>
-        <div style="flex:1"><div style="font-size:13px;font-weight:700">${r.user||'Пользователь'}</div><div style="font-size:11px;color:var(--gray)">${r.date||''}</div></div>
-        <div style="color:#F59E0B;font-size:15px">${'★'.repeat(r.stars)}</div>
-      </div>
-      \${r.comment?\`<div style="font-size:13px;color:var(--gray);line-height:1.5;padding-left:40px">\${r.comment}</div>\`:''}
-    </div>`).join('');
+  const html = items.map(function(r){
+    const commentHtml = r.comment
+      ? '<div style="font-size:13px;color:var(--gray);line-height:1.5;padding-left:40px">'+r.comment+'</div>'
+      : '';
+    const stars = '★'.repeat(r.stars);
+    const initial = (r.user||'?')[0].toUpperCase();
+    const name = r.user||'Пользователь';
+    const date = r.date||'';
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--beige-mid);text-align:left">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+      + '<div style="width:32px;height:32px;border-radius:50%;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;flex-shrink:0">'+initial+'</div>'
+      + '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+name+'</div><div style="font-size:11px;color:var(--gray)">'+date+'</div></div>'
+      + '<div style="color:#F59E0B;font-size:15px">'+stars+'</div>'
+      + '</div>'
+      + commentHtml
+      + '</div>';
+  }).join('');
+  rList.innerHTML = html;
 }
-
 
 // ══ API CONFIG ══
 const API = 'https://auto-helper-backend-production.up.railway.app/api/auth';
