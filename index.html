@@ -230,16 +230,46 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
     </div>
     <div id="loginForm">
       <div class="fg"><label>Email или телефон</label><input type="text" id="loginEmail" placeholder="ivan@mail.ru или +7 900..."></div>
-      <div class="fg"><label>Пароль</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fg"><label>Пароль</label>
+        <div style="position:relative">
+          <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:44px">
+          <button type="button" onclick="togglePass('loginPass','eyeLogin')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray)" id="eyeLogin">👁</button>
+        </div>
+      </div>
       <div class="ferr" id="loginError"></div>
+      <div id="loginHint" style="display:none;font-size:12px;color:var(--gray);background:rgba(196,168,130,.1);padding:10px 12px;border-radius:10px;line-height:1.6;margin-top:6px">
+        💡 <b>Подсказка:</b> Убедитесь что вводите тот же email или телефон что указывали при регистрации. Телефон вводите в формате +79001234567.
+      </div>
       <button class="btn btn-dark" id="loginBtn" onclick="doLogin()">Войти</button>
       <button class="btn btn-outline" onclick="closeModal('authModal');openModal('forgotModal')">Забыли пароль?</button>
     </div>
     <div id="registerForm" style="display:none">
       <div class="fg"><label>Имя</label><input type="text" id="regName" placeholder="Иван Иванов"></div>
+      <div class="fg"><label>Фамилия (необязательно)</label><input type="text" id="regLastName" placeholder="Иванов"></div>
       <div class="fg"><label>Email</label><input type="email" id="regEmail" placeholder="ivan@mail.ru"></div>
-      <div class="fg"><label>Телефон</label><input type="tel" id="regPhone" placeholder="+7 900 000 0000"></div>
-      <div class="fg"><label>Пароль</label><input type="password" id="regPass" placeholder="Минимум 6 символов"></div>
+      <div class="fg"><label>Телефон</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select id="regPhoneCode" style="width:100px;padding:10px 6px;border-radius:11px;border:1.5px solid var(--beige-mid);background:var(--beige-light);font-family:'Nunito',sans-serif;font-size:13px;color:var(--dark);outline:none">
+            <option value="+7">🇷🇺 +7</option>
+            <option value="+375">🇧🇾 +375</option>
+            <option value="+380">🇺🇦 +380</option>
+            <option value="+7 6">🇰🇿 +7</option>
+          </select>
+          <input type="tel" id="regPhone" placeholder="900 000 0000" maxlength="11" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" style="flex:1">
+        </div>
+      </div>
+      <div class="fg"><label>Пароль</label>
+        <div style="position:relative">
+          <input type="password" id="regPass" placeholder="Минимум 6 символов" style="padding-right:44px">
+          <button type="button" onclick="togglePass('regPass','eyeReg')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray)" id="eyeReg">👁</button>
+        </div>
+      </div>
+      <div class="fg"><label>Повторите пароль</label>
+        <div style="position:relative">
+          <input type="password" id="regPass2" placeholder="Повторите пароль" style="padding-right:44px">
+          <button type="button" onclick="togglePass('regPass2','eyeReg2')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray)" id="eyeReg2">👁</button>
+        </div>
+      </div>
       <div class="ferr" id="regError"></div><div class="fsuc" id="regSuccess"></div>
       <button class="btn btn-dark" id="registerBtn" onclick="doRegister()">Создать аккаунт</button>
     </div>
@@ -389,6 +419,20 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
   </div>
 </div>
 
+
+<!-- ORG REVIEWS MODAL -->
+<div class="overlay" id="orgReviewsModal">
+  <div class="modal" style="max-height:80vh;overflow-y:auto">
+    <button class="modal-close" onclick="closeModal('orgReviewsModal')">✕</button>
+    <h2 id="orgReviewsTitle">Отзывы</h2>
+    <div class="modal-sub" id="orgReviewsRating"></div>
+    <div id="orgReviewsList" style="margin-top:16px"></div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--beige-mid)">
+      <button class="btn btn-dark btn-sm" style="width:auto" onclick="closeModal('orgReviewsModal');requireAuth(()=>openReviewModal(-1))">+ Написать отзыв</button>
+    </div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav>
   <span class="nav-logo" onclick="showPage('home')">Авто<span>-помощник</span></span>
@@ -426,7 +470,7 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
       <p class="hero-sub">Найди автосервис, вызови эвакуатор и следи за состоянием своего автомобиля — всё в одном приложении.</p>
       <div class="hero-btns">
         <button class="btn-hp" onclick="downloadAPK()">⬇ Скачать APK</button>
-        <button class="btn-hs" onclick="showPage('catalog')">Смотреть организации →</button>
+        <a class="btn-hs" href="#" onclick="showPage('catalog');return false">Смотреть организации →</a>
       </div>
       <div class="hero-stats">
         <div><div class="stat-num">26</div><div class="stat-label">организаций</div></div>
@@ -484,7 +528,7 @@ footer{background:var(--dark);color:rgba(255,255,255,.55);padding:50px 5vw 28px}
     <div class="stag" style="color:rgba(255,255,255,.7)">Скачать бесплатно</div>
     <h2 class="stitle">Скачайте приложение прямо сейчас</h2>
     <p>Бесплатно для Android. Только для жителей Абакана.</p>
-    <div class="cta-btns"><button class="cta-main" onclick="downloadAPK()">⬇ Скачать APK</button><button class="cta-ghost" onclick="showPage('catalog')">Смотреть организации</button></div>
+    <div class="cta-btns"><button class="cta-main" onclick="downloadAPK()">⬇ Скачать APK</button><a class="cta-ghost" href="#" onclick="showPage('catalog');return false">Смотреть организации</a></div>
   </div>
   <footer>
     <div class="footer-inner">
@@ -605,6 +649,7 @@ const DB={get(k){try{return JSON.parse(localStorage.getItem('ah_'+k))}catch{retu
 
 // ══ API CONFIG ══
 const API = 'https://auto-helper-backend-production.up.railway.app/api/auth';
+const ORGS_API = 'https://auto-helper-backend-production.up.railway.app/api/organizations';
 
 function getToken(){ return DB.get('access_token')||''; }
 function getRefresh(){ return DB.get('refresh_token')||''; }
@@ -1058,9 +1103,9 @@ const DEFAULT_REVIEWS=[
 ];
 
 const DOCS_DEFAULT={
-  vu:{name:'🪪 Водительское удостоверение',expiry:'2029-03-15',issue:'2019-03-15',number:''},
-  med:{name:'🏥 Медицинская справка',expiry:'2025-08-10',issue:'2024-08-10',number:''},
-  osago:{name:'📋 ОСАГО',expiry:'2024-11-22',issue:'2023-11-22',number:''},
+  vu:{name:'🪪 Водительское удостоверение',expiry:'',issue:'',number:''},
+  med:{name:'🏥 Медицинская справка',expiry:'',issue:'',number:''},
+  osago:{name:'📋 ОСАГО',expiry:'',issue:'',number:''},
 };
 
 const FAQS=[
@@ -1213,9 +1258,9 @@ function showPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+n).classList.add('active');
   window.scrollTo(0,0);
-  if(n==='catalog')filterOrgs();
+  if(n==='catalog'){filterOrgs();}
   if(n==='garage')renderGarage();
-  if(n==='reviews')renderReviews();
+  if(n==='reviews'){loadServerReviews();}
   if(n==='faq')renderFaq();
   if(n==='profile')renderProfile();
   if(n==='settings')syncSettings();
@@ -1389,7 +1434,11 @@ function setFilter(t,btn){
 function setView(v,btn){cView=v;document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('orgsGrid').className=v==='grid'?'orgs-grid-view':'orgs-list-view';filterOrgs();}
 function filterOrgs(){
   const q=(document.getElementById('searchInput').value||'').toLowerCase();
-  const all=[...DEFAULT_REVIEWS,...(DB.get('reviews')||[])];
+  const serverRevs=DB.get('serverReviews')||[];
+  const localRevs=DB.get('reviews')||[];
+  const serverIds=new Set(serverRevs.map(r=>r.serverId).filter(Boolean));
+  const dedupLocal=localRevs.filter(r=>!r.serverId||!serverIds.has(r.serverId));
+  const all=[...DEFAULT_REVIEWS,...serverRevs,...dedupLocal];
   const list=ORGS.filter(o=>(cFilter==='all'||o.type===cFilter)&&o.name.toLowerCase().includes(q));
   const grid=document.getElementById('orgsGrid'),nr=document.getElementById('noResults');
   if(!list.length){grid.innerHTML='';nr.style.display='';return;}
@@ -1614,7 +1663,6 @@ function updateAppRatingStat(){
 
 function openAppRating(){
   currentAppStar = 0;
-  // Check if user already rated
   const ratings = DB.get('appRatings')||[];
   const myRating = currentUser ? ratings.find(r=>r.uid===currentUser.id) : null;
   if(myRating){
@@ -1628,6 +1676,26 @@ function openAppRating(){
   const {avg, count} = getAppRating();
   document.getElementById('appRatingDisplay').textContent = avg==='—'?'—':avg+'★';
   document.getElementById('appRatingCount').textContent = count+' '+(count===1?'оценка':count<5?'оценки':'оценок');
+  // Render community ratings
+  const rList = document.getElementById('appRatingsList');
+  if(rList){
+    if(!ratings.length){
+      rList.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:10px">Отзывов пока нет</div>';
+    } else {
+      rList.innerHTML = ratings.slice(-10).reverse().map(r=>`
+        <div style="padding:10px 0;border-bottom:1px solid var(--beige-mid);text-align:left">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;font-family:'Unbounded',sans-serif;flex-shrink:0">${(r.user||'?')[0].toUpperCase()}</div>
+            <div>
+              <div style="font-size:13px;font-weight:700">${r.user||'Пользователь'}</div>
+              <div style="font-size:11px;color:var(--gray)">${r.date||''}</div>
+            </div>
+            <div style="margin-left:auto;color:#F59E0B;font-size:14px">${'★'.repeat(r.stars)}</div>
+          </div>
+          ${r.comment?`<div style="font-size:13px;color:var(--gray);line-height:1.5;padding-left:38px">${r.comment}</div>`:''}
+        </div>`).join('');
+    }
+  }
   openModal('appRatingModal');
 }
 
@@ -1644,19 +1712,25 @@ function submitAppRating(){
   if(!currentUser){ closeModal('appRatingModal'); openModal('authModal'); showToast('Войдите чтобы оценить',false); return; }
   const ratings = DB.get('appRatings')||[];
   const comment = document.getElementById('appRatingText').value.trim();
-  // Update or add rating
   const existIdx = ratings.findIndex(r=>r.uid===currentUser.id);
   const newRating = {uid:currentUser.id, user:currentUser.name||currentUser.email, stars:currentAppStar, comment, date:new Date().toLocaleDateString('ru-RU')};
   if(existIdx>=0) ratings[existIdx]=newRating;
   else ratings.push(newRating);
   DB.set('appRatings', ratings);
-  // Update display
   const {avg, count} = getAppRating();
   document.getElementById('appRatingDisplay').textContent = avg+'★';
   document.getElementById('appRatingCount').textContent = count+' '+(count===1?'оценка':count<5?'оценки':'оценок');
   updateAppRatingStat();
-  closeModal('appRatingModal');
   showToast('Спасибо за оценку! '+('★'.repeat(currentAppStar)), true);
+  // Refresh modal with new ratings
+  setTimeout(()=>openAppRating(), 500);
+}
+
+function togglePass(inputId, btnId){
+  const inp=document.getElementById(inputId);
+  const btn=document.getElementById(btnId);
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁';}
 }
 
 function openMaps(name, addr){
@@ -1689,6 +1763,39 @@ function openMaps(name, addr){
 }
 
 // Review search
+function showOrgReviews(orgName, event){
+  if(event) event.stopPropagation();
+  const serverRevs=DB.get('serverReviews')||[];
+  const localRevs=DB.get('reviews')||[];
+  const serverIds=new Set(serverRevs.map(r=>r.serverId).filter(Boolean));
+  const dedupLocal=localRevs.filter(r=>!r.serverId||!serverIds.has(r.serverId));
+  const all=[...DEFAULT_REVIEWS,...serverRevs,...dedupLocal.map((r,i)=>({...r,_idx:i}))];
+  const revs=all.filter(r=>{
+    const ro=r.org.toLowerCase();const on=orgName.toLowerCase();
+    return ro===on||on.includes(ro)||ro.includes(on.split(' ')[0]);
+  });
+  document.getElementById('orgReviewsTitle').textContent=orgName;
+  const avg=revs.length?(revs.reduce((s,r)=>s+r.stars,0)/revs.length).toFixed(1):null;
+  document.getElementById('orgReviewsRating').textContent=avg?('★ '+avg+' · '+revs.length+' отзывов'):'Отзывов пока нет';
+  const me=currentUser?(currentUser.name||currentUser.email):'';
+  document.getElementById('orgReviewsList').innerHTML=revs.length?revs.map(r=>{
+    const isMine=me&&r.user===me&&r._idx!==undefined;
+    return`<div style="border-bottom:1px solid var(--beige-mid);padding:12px 0">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:700;font-family:'Unbounded',sans-serif;flex-shrink:0">${r.user[0].toUpperCase()}</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:13px">${r.user}${isMine?' <span style="font-size:10px;color:var(--beige)">· мой</span>':''}</div><div style="font-size:11px;color:var(--gray)">${r.date}</div></div>
+        <div style="color:#F59E0B;font-size:14px">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+      </div>
+      <div style="font-size:13px;color:var(--gray);line-height:1.6">${r.text}</div>
+      ${isMine?`<div style="display:flex;gap:6px;margin-top:8px">
+        <button onclick="closeModal('orgReviewsModal');requireAuth(()=>openReviewModal(${r._idx}))" style="padding:5px 12px;border-radius:20px;border:none;background:var(--beige-mid);color:var(--dark);font-size:11px;font-weight:700;cursor:pointer">✏️ Изменить</button>
+        <button onclick="deleteReview(${r._idx});closeModal('orgReviewsModal')" style="padding:5px 12px;border-radius:20px;border:none;background:rgba(229,57,53,.1);color:var(--red);font-size:11px;font-weight:700;cursor:pointer">🗑️ Удалить</button>
+      </div>`:''}
+    </div>`;
+  }).join(''):'<div style="text-align:center;padding:20px;color:var(--gray)">Отзывов пока нет. Будьте первым!</div>';
+  openModal('orgReviewsModal');
+}
+
 function filterReviews(){
   const q = (document.getElementById('reviewSearch')?.value||'').toLowerCase();
   document.querySelectorAll('.org-review-group').forEach(g=>{
@@ -1699,10 +1806,11 @@ function filterReviews(){
 
 let editRevIdx=-1;
 function setStar(n){cStar=n;document.querySelectorAll('#starPick span').forEach((s,i)=>s.classList.toggle('on',i<n));}
-function openReviewModal(idx=-1){
+function openReviewModal(idx=-1, preselectedOrg=''){
   editRevIdx=idx;
   const sel=document.getElementById('reviewOrg');sel.innerHTML='<option value="">— Выберите —</option>';
   ORGS.forEach(o=>{const op=document.createElement('option');op.value=o.name;op.textContent=o.name;sel.appendChild(op);});
+  if(preselectedOrg) sel.value=preselectedOrg;
   if(idx>=0){
     const revs=DB.get('reviews')||[];const r=revs[idx];
     if(r){sel.value=r.org;setStar(r.stars);document.getElementById('reviewText').value=r.text;
@@ -1713,22 +1821,103 @@ function openReviewModal(idx=-1){
   }
   openModal('reviewModal');
 }
-function submitReview(){
-  const org=document.getElementById('reviewOrg').value;
+async function submitReview(){
+  const orgName=document.getElementById('reviewOrg').value;
   const text=document.getElementById('reviewText').value.trim();
-  if(!org){showToast('Выберите организацию',false);return;}
+  if(!orgName){showToast('Выберите организацию',false);return;}
   if(!text){showToast('Напишите комментарий',false);return;}
+  if(cStar===0){showToast('Поставьте оценку',false);return;}
+
+  // Find org id from ORGS array
+  const org = ORGS.find(o=>o.name===orgName);
+  const orgId = org ? org.id : null;
+
+  // Save to server if we have org id and token
+  if(orgId && getToken()){
+    let res;
+    if(editRevIdx>=0){
+      // Edit existing - find server review id
+      const localRevs=DB.get('reviews')||[];
+      const localRev=localRevs[editRevIdx];
+      if(localRev && localRev.serverId){
+        res = await apiCall(ORGS_API+'/reviews/'+localRev.serverId+'/', 'PATCH',
+          {rating:cStar, text}, true);
+      }
+    }
+    if(!res || !res.ok){
+      res = await apiCall(ORGS_API+'/'+orgId+'/reviews/', 'POST',
+        {rating:cStar, text}, true);
+    }
+    if(res && res.ok){
+      // Also save locally with server id for future edits
+      const revs=DB.get('reviews')||[];
+      const rev={user:currentUser.name||currentUser.email, org:orgName, stars:cStar, text,
+        date:new Date().toLocaleDateString('ru-RU'), uid:currentUser.id,
+        serverId:res.data.id||null};
+      if(editRevIdx>=0) revs[editRevIdx]=rev;
+      else revs.push(rev);
+      DB.set('reviews',revs);
+      closeModal('reviewModal');
+      // Reload reviews from server
+      await loadServerReviews();
+      showToast(editRevIdx>=0?'Отзыв обновлён ✓':'Отзыв опубликован! ⭐',true);
+      editRevIdx=-1;
+      return;
+    }
+  }
+
+  // Fallback to local storage
   const revs=DB.get('reviews')||[];
-  const rev={user:currentUser.name||currentUser.email,org,stars:cStar,text,date:new Date().toLocaleDateString('ru-RU'),uid:currentUser.id};
+  const rev={user:currentUser.name||currentUser.email, org:orgName, stars:cStar, text,
+    date:new Date().toLocaleDateString('ru-RU'), uid:currentUser.id};
   if(editRevIdx>=0){revs[editRevIdx]=rev;DB.set('reviews',revs);showToast('Отзыв обновлён ✓',true);}
   else{revs.push(rev);DB.set('reviews',revs);showToast('Отзыв опубликован! ⭐',true);}
   closeModal('reviewModal');renderReviews();updateRating();
+  editRevIdx=-1;
 }
 function deleteReview(idx){
   const revs=DB.get('reviews')||[];revs.splice(idx,1);DB.set('reviews',revs);
   renderReviews();updateRating();showToast('Отзыв удалён',false);
 }
 // Match review org name to actual org name (partial match)
+// Load reviews from server and merge with defaults
+async function loadServerReviews(){
+  try {
+    // Load reviews for all orgs page by page
+    const serverRevs = [];
+    for(const org of ORGS){
+      const res = await fetch(ORGS_API+'/'+org.id+'/reviews/?page_size=50');
+      if(res.ok){
+        const data = await res.json();
+        const results = data.results || data;
+        results.forEach(r=>{
+          // Try multiple possible field names from serializer
+          const userName = r.user_name || r.user_full_name || r.author_name ||
+            (r.user && typeof r.user === 'object' ? (r.user.first_name||'')+' '+(r.user.last_name||'') : '') ||
+            (r.user && typeof r.user === 'string' ? r.user : '') ||
+            'Пользователь';
+          serverRevs.push({
+            user: userName.trim() || 'Пользователь',
+            org: org.name,
+            stars: r.rating,
+            text: r.text || '',
+            date: r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU') : '',
+            serverId: r.id,
+            uid: r.user_id || (r.user && r.user.id) || r.user,
+          });
+        });
+      }
+    }
+    if(serverRevs.length > 0){
+      DB.set('serverReviews', serverRevs);
+    }
+  } catch(e){
+    console.log('Could not load server reviews:', e);
+  }
+  renderReviews();
+  updateRating();
+}
+
 function matchOrgName(reviewOrg){
   // exact match first
   const exact = ORGS.find(o=>o.name===reviewOrg);
@@ -1744,7 +1933,12 @@ function matchOrgName(reviewOrg){
 
 function renderReviews(){
   const userRevs=DB.get('reviews')||[];
-  const all=[...DEFAULT_REVIEWS,...userRevs.map((r,i)=>({...r,_idx:i}))];
+  const serverRevs=DB.get('serverReviews')||[];
+  // Merge: server reviews override defaults, local reviews are added on top
+  // Deduplicate by serverId
+  const serverIds=new Set(serverRevs.map(r=>r.serverId).filter(Boolean));
+  const localRevs=userRevs.filter(r=>!r.serverId||!serverIds.has(r.serverId));
+  const all=[...DEFAULT_REVIEWS,...serverRevs,...localRevs.map((r,i)=>({...r,_idx:i}))];
   // Normalize org names to match current ORGS
   all.forEach(r=>{ r.orgDisplay = matchOrgName(r.org); });
   const byOrg={};
@@ -1787,7 +1981,13 @@ function renderReviews(){
 function renderFaq(){document.getElementById('faqList').innerHTML=FAQS.map((f,i)=>`<div class="faq-item" id="faq${i}"><div class="faq-q" onclick="toggleFaq(${i})">${f.q}<span class="faq-arrow">▼</span></div><div class="faq-a">${f.a}</div></div>`).join('');}
 function toggleFaq(i){document.querySelectorAll('.faq-item').forEach((el,j)=>{if(j!==i)el.classList.remove('open');});document.getElementById('faq'+i).classList.toggle('open');}
 
-function getDocSt(exp){const d=(new Date(exp)-new Date())/(1000*60*60*24);if(d<0)return{cls:'due',label:'Просрочено'};if(d<90)return{cls:'warn',label:'Скоро истекает'};return{cls:'ok',label:'Актуально'};}
+function getDocSt(exp){
+  if(!exp) return {cls:'',label:'Не заполнено'};
+  const d=(new Date(exp)-new Date())/(1000*60*60*24);
+  if(d<0) return{cls:'due',label:'Просрочено'};
+  if(d<90) return{cls:'warn',label:'Скоро истекает'};
+  return{cls:'ok',label:'Актуально'};
+}
 async function renderProfile(){
   if(!currentUser){showPage('home');openModal('authModal');return;}
   // Try to refresh profile from server
@@ -1822,7 +2022,12 @@ async function renderProfile(){
   const totalEl=document.getElementById('pTotalRevs');
   if(totalEl) totalEl.textContent=totalRevs;
   const docs={...DOCS_DEFAULT,...(DB.get('docs_'+currentUser.id)||{})};
-  document.getElementById('docsWrap').innerHTML=Object.entries(docs).map(([k,d])=>{const s=getDocSt(d.expiry);return`<div class="doc-row"><div><div class="doc-name">${d.name}</div><div class="doc-date">До: ${new Date(d.expiry).toLocaleDateString('ru-RU')}${d.number?' · '+d.number:''}</div></div><div class="doc-right"><span class="doc-status ${s.cls}">${s.label}</span><button class="doc-edit-btn" onclick="openEditDoc('${k}')">✏️</button></div></div>`;}).join('');
+  document.getElementById('docsWrap').innerHTML=Object.entries(docs).map(([k,d])=>{
+    const s=getDocSt(d.expiry);
+    const dateStr=d.expiry?'До: '+new Date(d.expiry).toLocaleDateString('ru-RU')+(d.number?' · '+d.number:''):'Нажмите ✏️ чтобы заполнить';
+    const statusStyle=s.cls?`class="doc-status ${s.cls}"`:`style="font-size:11px;color:var(--gray)"`;
+    return`<div class="doc-row"><div><div class="doc-name">${d.name}</div><div class="doc-date" style="color:${d.expiry?'inherit':'var(--gray)'}">${dateStr}</div></div><div class="doc-right"><span ${statusStyle}>${s.label}</span><button class="doc-edit-btn" onclick="openEditDoc('${k}')">✏️</button></div></div>`;
+  }).join('');
 }
 function openEditDoc(k){
   const docs={...DOCS_DEFAULT,...(DB.get('docs_'+currentUser.id)||{})};
@@ -1934,6 +2139,8 @@ if(currentUser && getToken()){
 }
 updateNav();
 updateAppRatingStat();
+// Load reviews from server on startup (non-blocking)
+loadServerReviews();
 </script>
 </body>
 </html>
